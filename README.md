@@ -5,7 +5,7 @@ particle accelerator simulation code [General Particle Tracer (GPT)](http://www.
 ## Quickstart
 Let's look at a minimal example of reading and writing GDF files.  GDF files are organized into blocks which each have a
 name, a value, and possibly some children which are also blocks.
-```
+```python
 import easygdf
 import numpy as np
 
@@ -24,7 +24,7 @@ for b in d["blocks"]:
 ```
 For the output of GPT, however, we don't need to deal with raw blocks and can rely on easyGDF to return the data in a
 cleaner format.  Let's try using one of the convenience functions for this task.
-```
+```python
 import easygdf
 
 # Pull out an example screen/tout file from easygdf
@@ -43,7 +43,7 @@ print("m: {0}".format(screen["m"]))
 ```
 Another common use of GDF files is in specifying initial particle distributions for GPT.  Let's take a look at using the
 library's function for this task.
-```
+```python
 import easygdf
 import numpy as np
 
