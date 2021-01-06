@@ -1,4 +1,4 @@
-# easyGDF
+# EasyGDF
 EasyGDF is a python library that simplifies the loading and saving of general datafile format (GDF) files used in the
 particle accelerator simulation code [General Particle Tracer (GPT)](http://www.pulsar.nl/gpt/).  
 
