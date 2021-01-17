@@ -1,5 +1,9 @@
 
 # EasyGDF ⚡
+[![](https://img.shields.io/pypi/v/easygdf.svg)](https://pypi.org/pypi/easygdf/)
+[![](https://img.shields.io/pypi/pyversions/easygdf.svg)](https://pypi.org/pypi/easygdf/)
+[![](https://img.shields.io/pypi/l/easygdf.svg)](https://pypi.org/pypi/easygdf/)
+
 ![Header Image](media/header_image.PNG)
 
 EasyGDF is a python library that simplifies the loading and saving of general datafile format (GDF) files used in the
