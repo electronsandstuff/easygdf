@@ -44,21 +44,21 @@ def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz
     them with zeros.  Only specify the momentum or the velocity of particles, not both.
 
     :param f: filename or open file/stream-like object
-    :param x: numpy array
-    :param y:numpy array
-    :param z:numpy array
-    :param GBx:numpy array
-    :param GBy:numpy array
-    :param GBz:numpy array
-    :param Bx:numpy array
-    :param By:numpy array
-    :param Bz:numpy array
-    :param t:numpy array
-    :param G:numpy array
-    :param m:numpy array
-    :param q:numpy array
-    :param nmacro:numpy array
-    :param rmacro:numpy array
+    :param x: numpy array, particle position
+    :param y:numpy array, particle position
+    :param z:numpy array, particle position
+    :param GBx:numpy array, particle momentum
+    :param GBy:numpy array, particle momentum
+    :param GBz:numpy array, particle momentum
+    :param Bx:numpy array, particle velocity
+    :param By:numpy array, particle velocity
+    :param Bz:numpy array, particle velocity
+    :param t:numpy array, particle spawn time
+    :param G:numpy array, Lorentz factor
+    :param m:numpy array, particle mass
+    :param q:numpy array, particle charge
+    :param nmacro:numpy array, number of macroparticles
+    :param rmacro:numpy array, macroparticle size
     :param creation_time: int/datetime object creation time written to header (default: time when file is written)
     :param creator: string written to header
     :param destination: string written to header
