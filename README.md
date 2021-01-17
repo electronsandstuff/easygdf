@@ -10,7 +10,7 @@ pip install easygdf
 
 ## Quickstart
 Let's look at a minimal example of reading and writing GDF files.  GDF files are organized into blocks which each have a
-name, a value, and possibly some children which are also blocks.
+name, a value, and possibly some children.  The children are also blocks.
 ```python
 import easygdf
 import numpy as np
@@ -28,7 +28,20 @@ d = easygdf.load("minimal.gdf")
 for b in d["blocks"]:
     print("name='{0}'; value='{1}'; n_children={2}".format(b["name"], b["value"], len(b["children"])))
 ```
-For the output of GPT, however, we don't need to deal with raw blocks and can rely on easyGDF to return the data in a
+EasyGDF returns data as python/numpy native data types.  The file is returned as a dictionary containing all elements of
+the file header as well as the data itself.  The blocks show up as a list under the key `blocks` in the returned dict.
+Every block contains the same three keys: `name`, `value`, and `children`.  Children is a python list of blocks itself.
+This format (GDF file being returned as a dict) is meant to be fully compatible with the corresponding GDF save
+function.  This makes quick modification of GDF files simple.
+```python
+import easygdf
+
+d = easygdf.load("your_file.gdf")
+# Modify the data in "d" here
+easygdf.save("modified_file.gdf", **d)
+```
+
+When we're dealing with the output of GPT directly and not an abstract GDF file, we don't need to deal with raw blocks and can rely on easyGDF to return the data in a
 cleaner format.  Let's try using one of the convenience functions for this task.
 ```python
 import easygdf
@@ -47,6 +60,9 @@ print("x: {0}".format(screen["x"]))
 print("Bx: {0}".format(screen["Bx"]))
 print("m: {0}".format(screen["m"]))
 ```
+All data is again returned as a dictionary with the screens and touts showing up as lists of dictionaries under the
+corresponding keys.
+
 Another common use of GDF files is in specifying initial particle distributions for GPT.  Let's take a look at using the
 library's function for this task.
 ```python
@@ -61,6 +77,9 @@ easygdf.save_initial_distribution(
     t=np.random.random((3,)),
 )
 ```
+You may notice, that we haven't specified all required particle parameters for GPT.  Don't worry, EasyGDF will autofill
+those values with zeros for you to produce a valid output.  Certain parameters (such as if you don't manually set `ID`)
+will be filled with appropriate non-zero values ([1,2,3,4,...] in this case).
 
 ## Testing
 Developers may use the python script `run_all_tests.py` to execute all unit tests in the project.  These tests are also
@@ -110,7 +129,7 @@ array.  Most numpy data types are supported except for complex types.  The conte
 itself a list of blocks with the same format.
 
 Function signature is fully compatible with load function to simplify the following example of editing a GDF file:
-```
+```python
 import easygdf
 
 d = easygdf.load("your_file.gdf")
