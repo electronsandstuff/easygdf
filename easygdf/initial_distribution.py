@@ -35,13 +35,14 @@ def load_initial_distribution(f, max_recurse=16, max_block=1e6):
 
 
 def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz=None, Bx=None, By=None, Bz=None,
-                              t=None, G=None, m=None, q=None, nmacro=None, rmacro=None, creation_time=None,
+                              t=None, G=None, m=None, q=None, nmacro=None, rmacro=None, ID=None, creation_time=None,
                               creator="easygdf", destination="", gdf_version=(1, 1), creator_version=(2, 0),
-                              destination_version=(0, 0), dummy=(0, 0), max_recurse=16):
+                              destination_version=(0, 0), dummy=(0, 0), max_recurse=16, **kwargs):
     """
     Saves GPT compatible initial distribution file.  All array objects must be the same length (IE the number of
     particles).  If required values (either {x,y,z,GBx,GBy,GBz} or {x,y,z,Bx,By,Bz}) are missing, easyGDF will autofill
-    them with zeros.  Only specify the momentum or the velocity of particles, not both.
+    them with zeros.  Only specify the momentum or the velocity of particles, not both.  Any parameters no directly in
+    the function's signature can be included as addition keyword arguments and will be added as well.
 
     :param f: filename or open file/stream-like object
     :param x: numpy array, particle position
@@ -59,6 +60,7 @@ def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz
     :param q:numpy array, particle charge
     :param nmacro:numpy array, number of macroparticles
     :param rmacro:numpy array, macroparticle size
+    :param ID:numpy array, macroparticle ID
     :param creation_time: int/datetime object creation time written to header (default: time when file is written)
     :param creator: string written to header
     :param destination: string written to header
@@ -71,7 +73,8 @@ def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz
     """
     # Copy all array elements into dict for processing and get rid of Nones
     data_raw = {"x": x, "y": y, "z": z, "GBx": GBx, "GBy": GBy, "GBz": GBz, "Bx": Bx, "By": By, "Bz": Bz, "t": t,
-                "G": G, "m": m, "q": q, "nmacro": nmacro, "rmacro": rmacro}
+                "G": G, "m": m, "q": q, "nmacro": nmacro, "rmacro": rmacro, "ID": ID}
+    data_raw.update(kwargs)
     data = {x: data_raw[x] for x in data_raw if data_raw[x] is not None}
 
     # Check if user has specified momentum or velocity
@@ -90,12 +93,11 @@ def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz
 
     # Fill in any missing elements
     target_length = max([data[x].size for x in data], default=0)
+    for arr in data:
+        if data[arr].size != target_length:
+            raise ValueError("All arrays must be same length")
     for arr in required_arrays:
-        if arr in data:
-            if data[arr].size != target_length:
-                raise ValueError("All arrays must be same length")
-
-        else:
+        if arr not in data:
             data[arr] = np.zeros((target_length,))
 
     # Turn the data into blocks

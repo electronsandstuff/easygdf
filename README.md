@@ -236,8 +236,10 @@ dict of initial distribution data
 
 ### save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz=None, ...)
 Saves GPT compatible initial distribution file.  All array objects must be the same length (IE the number of
-particles).  If required values (either {`x`, `y`, `z`, `GBx`, `GBy`, `GBz`} or {`x`, `y`, `z`, `Bx`, `By`, `Bz`}) are missing, easyGDF will autofill
-them with zeros.  Only specify the momentum or the velocity of particles, not both.
+particles).  If required values (either {`x`, `y`, `z`, `GBx`, `GBy`, `GBz`} or {`x`, `y`, `z`, `Bx`, `By`, `Bz`}) are
+missing, easyGDF will autofill them with zeros.  Only specify the momentum or the velocity of particles, not both. Any
+parameters no directly in the function's signature can be included as addition keyword arguments and will be added as
+well.
 
 ##### Parameters
  * f: filename or open file/stream-like object
@@ -256,6 +258,7 @@ them with zeros.  Only specify the momentum or the velocity of particles, not bo
  * q (default: None):numpy array, particle charge
  * nmacro (default: None):numpy array, number of macroparticles
  * rmacro (default: None):numpy array, macroparticle size
+ * ID (default: None):numpy array, macroparticle ID
  * creation_time (default: current time): int/datetime object creation time written to header (default: time when file is written)
  * creator (default: "easygdf"): string written to header
  * destination (default: ""): string written to header

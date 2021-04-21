@@ -50,6 +50,7 @@ class TestEasyGDFInitialDistribution(unittest.TestCase):
             'nmacro': np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
             "m": np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
             "G": np.array([1., 1., 1., 1., 1.]),
+            "ID": np.array([1., 2., 3., 4., 5.]),
             'rmacro': np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
             'creation_time': datetime.datetime(2019, 8, 7, 20, 47, 1, tzinfo=datetime.timezone.utc),
             'creator': 'ASCI2GDF',
