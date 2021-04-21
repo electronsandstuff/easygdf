@@ -69,7 +69,7 @@ class TestEasyGDFLoad(unittest.TestCase):
 
         # Write out the expected header
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 12, 34, 24),
+            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
             'creator': 'ASCI2GDF',
             'destination': '',
             'gdf_version': (1, 1),
@@ -93,7 +93,7 @@ class TestEasyGDFLoad(unittest.TestCase):
 
         # Write out the expected header
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 12, 34, 24),
+            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
             'creator': 'ASCI2GDF',
             'destination': '',
             'gdf_version': (1, 1),
@@ -298,7 +298,7 @@ class TestEasyGDFSave(unittest.TestCase):
         """
         # Write the header expected for the reference file
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 12, 34, 24),
+            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
             'creator': 'ASCI2GDF',
             'destination': '',
             'gdf_version': (1, 1),
@@ -353,7 +353,7 @@ class TestEasyGDFSave(unittest.TestCase):
         """
         # Write the header expected for the reference file
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 12, 34, 24),
+            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
             'creator': 'ASCI2GDF',
             'destination': '',
             'gdf_version': (1, 1),
@@ -511,7 +511,8 @@ class TestEasyGDFSave(unittest.TestCase):
         :return:
         """
         # Create a header to save
-        my_time = datetime.datetime.fromtimestamp(int(datetime.datetime.timestamp(datetime.datetime.now())))
+        my_time = datetime.datetime.fromtimestamp(int(datetime.datetime.timestamp(datetime.datetime.now())),
+                                                  tz=datetime.timezone.utc)
         fh = {
             "creation_time": my_time,
             "creator": "easygdf",

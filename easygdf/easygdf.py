@@ -292,7 +292,7 @@ def load(f, max_recurse=16, max_block=1e6):
     f.seek(0)
     fh_raw = struct.unpack("2i{0}s{0}s8B".format(GDF_NAME_LEN), f.read(48))
     ret = {
-        "creation_time": datetime.datetime.fromtimestamp(fh_raw[1]),
+        "creation_time": datetime.datetime.fromtimestamp(fh_raw[1], tz=datetime.timezone.utc),
         "creator": fh_raw[2].split(b'\0', 1)[0].decode('ascii'),
         "destination": fh_raw[3].split(b'\0', 1)[0].decode('ascii'),
         "gdf_version": (fh_raw[4], fh_raw[5]),
