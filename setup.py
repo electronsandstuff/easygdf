@@ -25,5 +25,5 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     python_requires='>=3.6',
-    liense="BSD-3-Clause",
+    license="BSD-3-Clause",
 )
