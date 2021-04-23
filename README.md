@@ -14,6 +14,10 @@ Find us on PyPI! 😀
 ```
 pip install easygdf
 ```
+Also available on [conda-forge](https://conda-forge.org/)!  Add the channel by following the instructions on their website and then install easygdf.
+```
+conda install easygdf
+```
 
 ## Quickstart
 Let's look at a minimal example of reading and writing GDF files.  GDF files are organized into blocks which each have a
