@@ -26,7 +26,7 @@ def normalize_screen(screen):
         out["position"] = screen["position"]
 
     # Fix array lengths
-    target_len = max([screen[x].size for x in screen if x != "position"], default=0)
+    target_len = max([screen[x].size for x in arr_keys], default=0)
     for key in arr_keys:
         if key in screen:
             if screen[key].size != target_len:
