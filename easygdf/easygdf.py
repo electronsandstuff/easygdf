@@ -10,6 +10,8 @@ import warnings
 
 import numpy as np
 
+from .utils import GDFIOError
+
 ########################################################################################################################
 # GDF Specific Constants
 ########################################################################################################################
@@ -284,9 +286,12 @@ def load(f, max_recurse=16, max_block=1e6):
             return load(ff, max_recurse=max_recurse, max_block=max_block)
 
     # Make sure we have got a GDF file opened in binary mode
-    assert isinstance(f, io.BufferedReader)
+    if not isinstance(f, io.BufferedReader):
+        raise GDFIOError(f"f must be file-like or a string not '{type(f)}'")
+
     f.read(1)  # Trigger any IO errors here
-    assert is_gdf(f)
+    if not is_gdf(f):
+        raise GDFIOError("Input is not a GDF file")
 
     # Read the GDF file header
     f.seek(0)
@@ -471,7 +476,8 @@ def save(f, blocks=None, creation_time=None, creator="easygdf", destination="", 
             )
 
     # Make sure we have an open file
-    assert isinstance(f, io.BufferedWriter)
+    if not isinstance(f, io.BufferedWriter):
+        raise GDFIOError(f"f must be file-like or a string not '{type(f)}'")
 
     # If not given user defined creation time, then take current date
     if creation_time is None:

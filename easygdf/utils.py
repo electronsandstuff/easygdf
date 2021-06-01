@@ -21,3 +21,11 @@ def get_example_initial_distribution():
     :return: Path to the example file
     """
     return pkg_resources.resource_filename("easygdf", "data/initial_distribution.gdf")
+
+
+class GDFError(Exception):
+    pass
+
+
+class GDFIOError(GDFError):
+    pass

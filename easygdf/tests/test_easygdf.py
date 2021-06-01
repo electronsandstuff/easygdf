@@ -276,7 +276,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         """
         # Attempt to open the file with the method under test
         with pkg_resources.resource_stream("easygdf.tests", "data/wrong_magic_number.gdf") as f:
-            with self.assertRaises(AssertionError):
+            with self.assertRaises(easygdf.GDFIOError):
                 easygdf.load(f)
 
     def test_load_null_array(self):
@@ -456,7 +456,7 @@ class TestEasyGDFSave(unittest.TestCase):
         Confirms exception is thrown when not given a file
         :return:
         """
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(easygdf.GDFIOError):
             easygdf.save(100, [])
 
     def test_save_wrong_file_mode(self):
@@ -466,7 +466,7 @@ class TestEasyGDFSave(unittest.TestCase):
         """
         testfile = os.path.join(tempfile.gettempdir(), "save_wrong_file_mode.gdf")
         with open(testfile, "w") as f:
-            with self.assertRaises(AssertionError):
+            with self.assertRaises(easygdf.GDFIOError):
                 easygdf.save(f, [])
 
     def test_save_block_has_bad_key(self):
