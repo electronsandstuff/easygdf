@@ -336,3 +336,11 @@ class TestEasyGDFScreensTouts(unittest.TestCase):
         test_file = os.path.join(tempfile.gettempdir(), "screens_touts_uniform_interface.gdf")
         with open(test_file, "wb") as f:
             easygdf.save_screens_touts(f, **all_data)
+
+    def test_normalize_screen_float(self):
+        """
+        Tests screen normalization with a file that has a float in screen.  This test added as part of pull-request 2
+        """
+        # Load a file
+        with pkg_resources.resource_stream("easygdf.tests", "data/normalize_screen_floats.gdf") as f:
+            all_data = easygdf.load_screens_touts(f)
