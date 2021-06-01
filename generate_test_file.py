@@ -312,6 +312,34 @@ def get_file_nested_group():
     return f
 
 
+def get_normalize_screen_floats():
+    """
+    Makes a GDF file with a valid nested group
+    :return: Bytes string representing file
+    """
+    f = get_header()
+    f += get_block_header(name="position", dtype=GDF_DOUBLE, single=True, array=False,
+                          size=GDF_DTYPES_STRUCT[GDF_DOUBLE][1], group_begin=True)
+    f += struct.pack(GDF_DTYPES_STRUCT[GDF_DOUBLE][0], 0.0)
+
+    for k in ['ID', 'x', 'y', 'z', 'Bx', 'By', 'Bz', 't', 'm', 'q', 'nmacro', 'rmacro', 'rxy', 'G']:
+        dtype = GDF_DOUBLE
+        f += get_block_header(name=k, dtype=dtype, single=False, array=True, size=6 * GDF_DTYPES_STRUCT[dtype][1])
+        d = GDF_DTYPES_STRUCT[dtype][0]
+        f += struct.pack(6 * d, 0, 1, 2, 3, 4, 5)
+    f += get_block_header(name="Particles", dtype=GDF_DOUBLE, single=True, array=False,
+                          size=GDF_DTYPES_STRUCT[GDF_DOUBLE][1])
+    f += struct.pack(GDF_DTYPES_STRUCT[GDF_DOUBLE][0], 0.0)
+    f += get_block_header(name="pCentral", dtype=GDF_DOUBLE, single=True, array=False,
+                          size=GDF_DTYPES_STRUCT[GDF_DOUBLE][1])
+    f += struct.pack(GDF_DTYPES_STRUCT[GDF_DOUBLE][0], 0.0)
+    f += get_block_header(name="Charge", dtype=GDF_DOUBLE, single=True, array=False,
+                          size=GDF_DTYPES_STRUCT[GDF_DOUBLE][1])
+    f += struct.pack(GDF_DTYPES_STRUCT[GDF_DOUBLE][0], 0.0)
+    f += get_block_header(name="", group_end=True)
+    return f
+
+
 def write_file(path, b):
     with open(path, "wb") as f:
         f.write(b)
@@ -322,6 +350,8 @@ def write_file(path, b):
 ########################################################################################################################
 data_files_path = "easygdf/tests/data"
 if __name__ == "__main__":
+    write_file(os.path.join(data_files_path, "normalize_screen_floats.gdf"), get_normalize_screen_floats())
+    '''
     write_file(os.path.join(data_files_path, "version_mismatch.gdf"), get_file_version_mismatch())
     write_file(os.path.join(data_files_path, "wrong_magic_number.gdf"), get_file_wrong_magic_number())
     write_file(os.path.join(data_files_path, "too_much_recursion.gdf"), get_file_too_much_recursion())
@@ -337,3 +367,4 @@ if __name__ == "__main__":
     write_file(os.path.join(data_files_path, "invalid_size_array.gdf"), get_file_invalid_array_size())
     write_file(os.path.join(data_files_path, "nested_groups.gdf"), get_file_nested_group())
     write_file(os.path.join(data_files_path, "null_array.gdf"), get_file_null_array())
+    '''
