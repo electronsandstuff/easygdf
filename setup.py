@@ -4,10 +4,10 @@ from setuptools import setup
 
 setup(
     name='easygdf',
-    version='2.0.6',
+    version='2.0.7',
     description='A python library to make working with GDF files a breeze.',
     long_description='A python library to make working with GDF files a breeze.  Check out our project on [github](https://github.com/electronsandstuff/easygdf)!',
-    long_description_content_type = 'text/markdown',
+    long_description_content_type='text/markdown',
     author='Christopher M. Pierce',
     author_email='contact@chris-pierce.com',
     packages=['easygdf', 'easygdf.tests'],
