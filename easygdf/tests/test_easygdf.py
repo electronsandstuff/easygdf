@@ -622,21 +622,17 @@ class TestEasyGDFSave(unittest.TestCase):
 
         :return:
         """
-
-        # If the system doesn't use 64 bit integers, just pass
-
-        # Make the data
-        val = np.zeros(32, dtype=np.int64)
-        val[0] = 0x7FFFFFFF17
-        blocks = [
-            {'name': 'ID', 'value': val, 'children': []}
-        ]
-
-        # Save it
-        test_file = os.path.join(tempfile.gettempdir(), "save_int_array_overflow.gdf")
-        with open(test_file, "wb") as f:
+        # Test overflowing int32
+        with open(os.path.join(tempfile.gettempdir(), "save_int_array_overflow_1.gdf"), "wb") as f:
             with self.assertRaises(ValueError):
-                easygdf.save(f, blocks)
+                easygdf.save(f, [{'name': 'ID', 'value': np.array([0x80000000, 0, 0, 0], dtype=np.int64),
+                                  'children': []}, ])
+
+        # Test overflowing int64
+        with open(os.path.join(tempfile.gettempdir(), "save_int_array_overflow_2.gdf"), "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, [{'name': 'ID', 'value': np.array([0x100000000, 0, 0, 0], dtype=np.uint64),
+                                  'children': []}, ])
 
 
 class TestEasyGDFLoadSave(unittest.TestCase):
@@ -664,16 +660,14 @@ class TestEasyGDFLoadSave(unittest.TestCase):
 
         :return:
         """
-        # Make the data
-        blocks = [
-            {'name': 'ID', 'value': np.arange(32) + 1, 'children': []}
-        ]
-
-        # Save it
-        test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_ids.gdf")
+        # Test conversion from int64 -> int32
+        test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_casting_1.gdf")
         with open(test_file, "wb") as f:
-            easygdf.save(f, blocks)
+            easygdf.save(f, [{'name': 'ID', 'value': np.zeros(32, dtype=np.int64), 'children': []}, ])
+        self.assertEqual(easygdf.load_initial_distribution(test_file)['ID'].dtype, np.dtype('int32'))
 
-        # Load it back and confirm the datatype
-        test = easygdf.load_initial_distribution(test_file)
-        self.assertEqual(test['ID'].dtype, np.dtype('int32'))
+        # Test conversion from uint64 -> uint32
+        test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_casting_2.gdf")
+        with open(test_file, "wb") as f:
+            easygdf.save(f, [{'name': 'ID', 'value': np.zeros(32, dtype=np.uint64), 'children': []}, ])
+        self.assertEqual(easygdf.load_initial_distribution(test_file)['ID'].dtype, np.dtype('uint32'))
