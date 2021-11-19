@@ -595,6 +595,48 @@ class TestEasyGDFSave(unittest.TestCase):
             with self.assertRaises(TypeError):
                 easygdf.save(f, [{"value": np.linspace(0, 5, 6, dtype=np.complex)}])
 
+    def test_int_single_overflow(self):
+        """
+        Confirms error is thrown if an integer larger than GDFs max size is passed
+
+        :return:
+        """
+
+        # If the system doesn't use 64 bit integers, just pass
+
+        # Make the data
+        blocks = [
+            {'name': 'ID', 'value': 0x7FFFFFFF17, 'children': []}
+        ]
+
+        # Save it
+        test_file = os.path.join(tempfile.gettempdir(), "save_int_single_overflow.gdf")
+        with open(test_file, "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, blocks)
+
+    def test_int_array_overflow(self):
+        """
+        Confirms error is thrown if an integer larger than GDFs max size is passed, array version
+
+        :return:
+        """
+
+        # If the system doesn't use 64 bit integers, just pass
+
+        # Make the data
+        val = np.zeros(32, dtype=np.int64)
+        val[0] = 0x7FFFFFFF17
+        blocks = [
+            {'name': 'ID', 'value': val, 'children': []}
+        ]
+
+        # Save it
+        test_file = os.path.join(tempfile.gettempdir(), "save_int_array_overflow.gdf")
+        with open(test_file, "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, blocks)
+
 
 class TestEasyGDFLoadSave(unittest.TestCase):
     def test_uniform_interface(self):
@@ -613,3 +655,24 @@ class TestEasyGDFLoadSave(unittest.TestCase):
         test_file = os.path.join(tempfile.gettempdir(), "easygdf_interface_test.gdf")
         with open(test_file, "wb") as f:
             easygdf.save(f, **all_data)
+
+    def test_integer_casting(self):
+        """
+        Confirms that integer 64 bit arrays get cast to 32 bits and saved.  This is related to github issue 5 because
+        GDF appears to not support 64 bit integers.
+
+        :return:
+        """
+        # Make the data
+        blocks = [
+            {'name': 'ID', 'value': np.arange(32) + 1, 'children': []}
+        ]
+
+        # Save it
+        test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_ids.gdf")
+        with open(test_file, "wb") as f:
+            easygdf.save(f, blocks)
+
+        # Load it back and confirm the datatype
+        test = easygdf.load_initial_distribution(test_file)
+        self.assertEqual(test['ID'].dtype, np.dtype('int32'))
