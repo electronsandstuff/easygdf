@@ -595,6 +595,45 @@ class TestEasyGDFSave(unittest.TestCase):
             with self.assertRaises(TypeError):
                 easygdf.save(f, [{"value": np.linspace(0, 5, 6, dtype=np.complex)}])
 
+    def test_int_single_overflow(self):
+        """
+        Confirms error is thrown if an integer larger than GDFs max size is passed. Test this for both positive and
+        negative values.  The positive integer should be cast to uint32 and the negative to int32.
+
+        :return:
+        """
+        # Test overflowing the negative value
+        with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_1.gdf"), "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, [{'name': 'ID', 'value': -0x80000000, 'children': []}, ])
+
+        # Confirm something bigger than the max int32 but smaller than the max uint32 doesn't overflow
+        with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_2.gdf"), "wb") as f:
+            easygdf.save(f, [{'name': 'ID', 'value': 0x80000000, 'children': []}, ])
+
+        # Test overflowing the positive value
+        with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_3.gdf"), "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, [{'name': 'ID', 'value': 0x100000000, 'children': []}, ])
+
+    def test_int_array_overflow(self):
+        """
+        Confirms error is thrown if an integer larger than GDFs max size is passed, array version
+
+        :return:
+        """
+        # Test overflowing int32
+        with open(os.path.join(tempfile.gettempdir(), "save_int_array_overflow_1.gdf"), "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, [{'name': 'ID', 'value': np.array([0x80000000, 0, 0, 0], dtype=np.int64),
+                                  'children': []}, ])
+
+        # Test overflowing int64
+        with open(os.path.join(tempfile.gettempdir(), "save_int_array_overflow_2.gdf"), "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, [{'name': 'ID', 'value': np.array([0x100000000, 0, 0, 0], dtype=np.uint64),
+                                  'children': []}, ])
+
 
 class TestEasyGDFLoadSave(unittest.TestCase):
     def test_uniform_interface(self):
@@ -613,3 +652,22 @@ class TestEasyGDFLoadSave(unittest.TestCase):
         test_file = os.path.join(tempfile.gettempdir(), "easygdf_interface_test.gdf")
         with open(test_file, "wb") as f:
             easygdf.save(f, **all_data)
+
+    def test_integer_casting(self):
+        """
+        Confirms that integer 64 bit arrays get cast to 32 bits and saved.  This is related to github issue 5 because
+        GDF appears to not support 64 bit integers.
+
+        :return:
+        """
+        # Test conversion from int64 -> int32
+        test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_casting_1.gdf")
+        with open(test_file, "wb") as f:
+            easygdf.save(f, [{'name': 'ID', 'value': np.zeros(32, dtype=np.int64), 'children': []}, ])
+        self.assertEqual(easygdf.load_initial_distribution(test_file)['ID'].dtype, np.dtype('int32'))
+
+        # Test conversion from uint64 -> uint32
+        test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_casting_2.gdf")
+        with open(test_file, "wb") as f:
+            easygdf.save(f, [{'name': 'ID', 'value': np.zeros(32, dtype=np.uint64), 'children': []}, ])
+        self.assertEqual(easygdf.load_initial_distribution(test_file)['ID'].dtype, np.dtype('uint32'))

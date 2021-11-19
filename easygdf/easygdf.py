@@ -375,19 +375,36 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
 
         # If we are a numpy array then write it
         if isinstance(block["value"], np.ndarray):
+            if block["value"].dtype == np.dtype('int64'):
+                if (np.abs(block["value"]) > 0x7FFFFFFF).any():
+                    idx = np.argmax(np.abs(block["value"]))
+                    raise ValueError(f'An array element exceeds the range of int32 (max compatible GDF size).  The '
+                                     f'element at index {idx} had value {block["value"]}, but int32s must have a max '
+                                     f'absolute value of 2,147,483,647.')
+                bval = block["value"].astype(np.int32)
+            elif block["value"].dtype == np.dtype('uint64'):
+                if (block["value"] > 0xFFFFFFFF).any():
+                    idx = np.argmax(np.abs(block["value"]))
+                    raise ValueError(f'An array element exceeds the range of uint32 (max compatible GDF size).  The '
+                                     f'element at index {idx} had value {block["value"]}, but int32s must have a max '
+                                     f'absolute value of 4,294,967,295.')
+                bval = block["value"].astype(np.uint32)
+            else:
+                bval = block["value"]
+
             # Set the array bit in the header
             block_type_flag += GDF_ARRAY
 
             # Determine the data type and add it to the header
-            dname = block["value"].dtype.name
+            dname = bval.dtype.name
             if dname not in NUMPY_TO_GDF:
                 raise TypeError("Cannot write numpy data type \"{0}\" to GDF file".format(dname))
             block_type_flag += NUMPY_TO_GDF[dname]
 
             # Write the header and then write the numpy array to the file
-            block_size = block["value"].size * block["value"].itemsize
+            block_size = bval.size * bval.itemsize
             f.write(bname + struct.pack("ii", block_type_flag, block_size))
-            block["value"].tofile(f)
+            bval.tofile(f)
 
         # If we aren't an array then we are a single value
         else:
@@ -401,9 +418,20 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
                 f.write(bname + struct.pack("ii{:d}s".format(block_size), block_type_flag, block_size,
                                             bytes(block["value"], "ascii")))
             elif isinstance(block["value"], int):
-                block_type_flag += GDF_INT32
-                block_size = 4
-                f.write(bname + struct.pack("iii", block_type_flag, block_size, block["value"]))
+                if block["value"] > 0:
+                    if abs(block["value"]) > 0xFFFFFFFF:
+                        raise ValueError(f"Value exceeds range of 32-bit unsigned int (largest supported size in GDF). "
+                                         f"Value cannot exceed 4,294,967,295.  Received {block['value']}")
+                    block_type_flag += GDF_UINT32
+                    block_size = 4
+                    f.write(bname + struct.pack("iiI", block_type_flag, block_size, block["value"]))
+                else:
+                    if abs(block["value"]) > 0x7FFFFFFF:
+                        raise ValueError(f"Value exceeds range of 32-bit signed int (largest supported size in GDF). "
+                                         f"Absolute value cannot exceed 2,147,483,647.  Received {block['value']}")
+                    block_type_flag += GDF_INT32
+                    block_size = 4
+                    f.write(bname + struct.pack("iii", block_type_flag, block_size, block["value"]))
             elif isinstance(block["value"], float):
                 block_type_flag += GDF_DOUBLE
                 block_size = 8
