@@ -401,9 +401,20 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
                 f.write(bname + struct.pack("ii{:d}s".format(block_size), block_type_flag, block_size,
                                             bytes(block["value"], "ascii")))
             elif isinstance(block["value"], int):
-                block_type_flag += GDF_INT32
-                block_size = 4
-                f.write(bname + struct.pack("iii", block_type_flag, block_size, block["value"]))
+                if block["value"] > 0:
+                    if abs(block["value"]) > 0xFFFFFFFF:
+                        raise ValueError(f"Value exceeds range of 32-bit unsigned int (largest supported size in GDF). "
+                                         f"Value cannot exceed 4,294,967,295.  Received {block['value']}")
+                    block_type_flag += GDF_UINT32
+                    block_size = 4
+                    f.write(bname + struct.pack("iiI", block_type_flag, block_size, block["value"]))
+                else:
+                    if abs(block["value"]) > 0x7FFFFFFF:
+                        raise ValueError(f"Value exceeds range of 32-bit signed int (largest supported size in GDF). "
+                                         f"Absolute value cannot exceed 2,147,483,647.  Received {block['value']}")
+                    block_type_flag += GDF_INT32
+                    block_size = 4
+                    f.write(bname + struct.pack("iii", block_type_flag, block_size, block["value"]))
             elif isinstance(block["value"], float):
                 block_type_flag += GDF_DOUBLE
                 block_size = 8

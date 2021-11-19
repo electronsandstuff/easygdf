@@ -597,23 +597,24 @@ class TestEasyGDFSave(unittest.TestCase):
 
     def test_int_single_overflow(self):
         """
-        Confirms error is thrown if an integer larger than GDFs max size is passed
+        Confirms error is thrown if an integer larger than GDFs max size is passed. Test this for both positive and
+        negative values.  The positive integer should be cast to uint32 and the negative to int32.
 
         :return:
         """
-
-        # If the system doesn't use 64 bit integers, just pass
-
-        # Make the data
-        blocks = [
-            {'name': 'ID', 'value': 0x7FFFFFFF17, 'children': []}
-        ]
-
-        # Save it
-        test_file = os.path.join(tempfile.gettempdir(), "save_int_single_overflow.gdf")
-        with open(test_file, "wb") as f:
+        # Test overflowing the negative value
+        with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_1.gdf"), "wb") as f:
             with self.assertRaises(ValueError):
-                easygdf.save(f, blocks)
+                easygdf.save(f, [{'name': 'ID', 'value': -0x80000000, 'children': []}, ])
+
+        # Confirm something bigger than the max int32 but smaller than the max uint32 doesn't overflow
+        with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_2.gdf"), "wb") as f:
+            easygdf.save(f, [{'name': 'ID', 'value': 0x80000000, 'children': []}, ])
+
+        # Test overflowing the positive value
+        with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_3.gdf"), "wb") as f:
+            with self.assertRaises(ValueError):
+                easygdf.save(f, [{'name': 'ID', 'value': 0x100000000, 'children': []}, ])
 
     def test_int_array_overflow(self):
         """
