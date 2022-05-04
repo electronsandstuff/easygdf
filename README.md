@@ -92,6 +92,14 @@ You may notice, that we haven't specified all required particle parameters for G
 those values with zeros for you to produce a valid output.  Certain parameters (such as if you don't manually set `ID`)
 will be filled with appropriate non-zero values ([1,2,3,4,...] in this case).
 
+## asci2gdf
+This package also comes with a script to convert plaintext files (such as for fieldmaps) into GDF files.
+Your input file should be tab delimited with a single line header indicating the names of the columns.
+An optional scaling factor may be applied (see help text of the program for more info).
+```
+asci2gdf_py [-h] [-o outfile] [--scale array_name scale_factor] infile
+```
+
 ## Testing
 Developers may use the python script `run_all_tests.py` to execute all unit tests in the project.  These tests are also
 distributed with the library and are available to end users.  They may be run on a system where easyGDF is installed
