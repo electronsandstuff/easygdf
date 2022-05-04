@@ -4,16 +4,16 @@ from setuptools import setup
 
 setup(
     name='easygdf',
-    version='2.0.6',
+    version='2.0.7',
     description='A python library to make working with GDF files a breeze.',
     long_description='A python library to make working with GDF files a breeze.  Check out our project on [github](https://github.com/electronsandstuff/easygdf)!',
-    long_description_content_type = 'text/markdown',
+    long_description_content_type='text/markdown',
     author='Christopher M. Pierce',
     author_email='contact@chris-pierce.com',
     packages=['easygdf', 'easygdf.tests'],
     package_data={'easygdf': ['data/*'], 'easygdf.tests': ['data/*']},
     include_package_data=True,
-    install_requires=['numpy'],
+    install_requires=['numpy', 'argparse'],
     classifiers=[
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
@@ -26,4 +26,9 @@ setup(
     ],
     python_requires='>=3.6',
     license="BSD-3-Clause",
+    entry_points={
+        'console_scripts': [
+            'asci2gdf_py = easygdf.asci2gdf:main'
+        ]
+    },
 )

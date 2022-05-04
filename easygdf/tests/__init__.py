@@ -4,6 +4,7 @@ from .test_easygdf import *
 from .test_initial_distribution import *
 from .test_screens_touts import *
 from .test_utils import *
+from .test_asci2gdf import *
 
 # Create a complete test suite for ourselves
 all_tests = unittest.TestSuite()
@@ -14,3 +15,4 @@ all_tests.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestEasyGDFIn
 all_tests.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestEasyGDFScreensTouts))
 all_tests.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestEasyGDFUtils))
 all_tests.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestEasyGDFHelpers))
+all_tests.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(TestAsci2gdf))

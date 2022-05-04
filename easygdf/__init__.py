@@ -6,3 +6,4 @@ from .easygdf import is_gdf, load, save
 from .initial_distribution import load_initial_distribution, save_initial_distribution
 from .screens_touts import load_screens_touts, save_screens_touts
 from .utils import get_example_screen_tout_filename, get_example_initial_distribution, GDFError, GDFIOError
+from .asci2gdf import main as asci2gdf_main
