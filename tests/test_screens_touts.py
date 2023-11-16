@@ -1,12 +1,5 @@
-#  This file is part of easygdf and is released under the BSD 3-clause license
-
-import os
-import tempfile
-import unittest
-
+import os, tempfile, unittest
 import numpy as np
-import pkg_resources
-
 import easygdf
 
 from .utils import load_test_resource

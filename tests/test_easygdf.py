@@ -1,14 +1,5 @@
-#  This file is part of easygdf and is released under the BSD 3-clause license
-
-import datetime
-import os
-import struct
-import tempfile
-import unittest
-
+import datetime, os, struct, tempfile, unittest
 import numpy as np
-import pkg_resources
-
 import easygdf
 
 from .utils import load_test_resource

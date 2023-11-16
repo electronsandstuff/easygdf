@@ -1,7 +1,4 @@
-#  This file is part of easygdf and is released under the BSD 3-clause license
-
 import unittest
-
 import easygdf
 
 
