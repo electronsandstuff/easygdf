@@ -17,11 +17,6 @@ dependencies = [
   "numpy",
 ]
 
-[project.optional-dependencies]
-tests = [
-  'pytest',
-]
-
 [tool.setuptools.package-data]
 easygdf = ["data/*"]
 
