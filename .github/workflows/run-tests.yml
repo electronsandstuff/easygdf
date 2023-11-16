@@ -3,8 +3,9 @@ name: Run python tests
 on:
   workflow_dispatch:
   push:
-   - master
-   - migrating-tests-and-pyproject
+    branches:
+      - master
+      - migrating-tests-and-pyproject
 
 jobs:
   test:
