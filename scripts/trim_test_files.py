@@ -1,7 +1,6 @@
 #  This file is part of easygdf and is released under the BSD 3-clause license
 
 import os
-
 import numpy as np
 
 import easygdf

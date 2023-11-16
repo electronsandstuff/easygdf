@@ -1,36 +1,30 @@
-#  This file is part of easygdf and is released under the BSD 3-clause license
-
-import datetime
-import os
-import struct
-import tempfile
-import unittest
-
+import datetime, os, struct, tempfile, unittest
 import numpy as np
-import pkg_resources
-
 import easygdf
+
+from .utils import load_test_resource
 
 
 class TestEasyGDFHelpers(unittest.TestCase):
     def test_is_gdf(self):
         # Attempt to open the file and use the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/test.gdf") as f:
+        
+        with load_test_resource("data/test.gdf") as f:
             is_gdf = easygdf.is_gdf(f)
         self.assertEqual(is_gdf, True)
 
         # Try to open one of the text files
-        with pkg_resources.resource_stream("easygdf.tests", "test_easygdf.py") as f:
+        with load_test_resource("test_easygdf.py") as f:
             is_gdf = easygdf.is_gdf(f)
         self.assertEqual(is_gdf, False)
 
     def test_is_gdf_str_URI(self):
         # Attempt to open the file and use the method under test
-        is_gdf = easygdf.is_gdf(pkg_resources.resource_filename("easygdf.tests", "data/test.gdf"))
+        is_gdf = easygdf.is_gdf(os.path.join(os.path.dirname(os.path.realpath(__file__)), "data/test.gdf"))
         self.assertEqual(is_gdf, True)
 
         # Try to open one of the text files
-        is_gdf = easygdf.is_gdf(pkg_resources.resource_filename("easygdf.tests", "test_easygdf.py"))
+        is_gdf = easygdf.is_gdf(os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_easygdf.py"))
         self.assertEqual(is_gdf, False)
 
 
@@ -41,7 +35,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return: None
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/test.gdf") as f:
+        with load_test_resource("data/test.gdf") as f:
             all_data = easygdf.load(f)
 
         # Create the reference data
@@ -64,7 +58,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return: None
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/test.gdf") as f:
+        with load_test_resource("data/test.gdf") as f:
             all_data = easygdf.load(f)
 
         # Write out the expected header
@@ -88,7 +82,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return: None
         """
         # Get the filename and open it with easygdf
-        fname = pkg_resources.resource_filename("easygdf.tests", "data/test.gdf")
+        fname = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data/test.gdf")
         all_data = easygdf.load(fname)
 
         # Write out the expected header
@@ -112,7 +106,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/all_dtypes.gdf") as f:
+        with load_test_resource("data/all_dtypes.gdf") as f:
             all_data = easygdf.load(f)
 
         # Check each block to confirm we got the correct value(s) back
@@ -152,7 +146,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/both_single_array.gdf") as f:
+        with load_test_resource("data/both_single_array.gdf") as f:
             with self.assertRaises(ValueError):
                 easygdf.load(f)
 
@@ -162,7 +156,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return: None
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/empty_group.gdf") as f:
+        with load_test_resource("data/empty_group.gdf") as f:
             all_data = easygdf.load(f)
 
         # Check that the block shows up w/o children
@@ -174,7 +168,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/group_begin_and_end.gdf") as f:
+        with load_test_resource("data/group_begin_and_end.gdf") as f:
             with self.assertRaises(ValueError):
                 easygdf.load(f)
 
@@ -184,7 +178,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/group_end_root.gdf") as f:
+        with load_test_resource("data/group_end_root.gdf") as f:
             with self.assertRaises(ValueError):
                 easygdf.load(f)
 
@@ -194,7 +188,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/invalid_dtype_array.gdf") as f:
+        with load_test_resource("data/invalid_dtype_array.gdf") as f:
             with self.assertRaises(TypeError):
                 easygdf.load(f)
 
@@ -204,7 +198,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/invalid_dtype_single.gdf") as f:
+        with load_test_resource("data/invalid_dtype_single.gdf") as f:
             with self.assertRaises(TypeError):
                 easygdf.load(f)
 
@@ -214,7 +208,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/invalid_size_array.gdf") as f:
+        with load_test_resource("data/invalid_size_array.gdf") as f:
             with self.assertRaises(ValueError):
                 easygdf.load(f)
 
@@ -224,7 +218,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/invalid_size_single.gdf") as f:
+        with load_test_resource("data/invalid_size_single.gdf") as f:
             with self.assertRaises(ValueError):
                 easygdf.load(f)
 
@@ -234,7 +228,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/nested_groups.gdf") as f:
+        with load_test_resource("data/nested_groups.gdf") as f:
             all_data = easygdf.load(f)
 
         self.assertEqual(all_data["blocks"][0]["children"][0]["children"][0]["value"], "deadbeef")
@@ -245,7 +239,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/too_much_recursion.gdf") as f:
+        with load_test_resource("data/too_much_recursion.gdf") as f:
             with self.assertRaises(RecursionError):
                 easygdf.load(f)
 
@@ -255,7 +249,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/unterminated_group.gdf") as f:
+        with load_test_resource("data/unterminated_group.gdf") as f:
             with self.assertRaises(IOError):
                 easygdf.load(f)
 
@@ -265,7 +259,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/version_mismatch.gdf") as f:
+        with load_test_resource("data/version_mismatch.gdf") as f:
             with self.assertWarns(Warning):
                 easygdf.load(f)
 
@@ -275,7 +269,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/wrong_magic_number.gdf") as f:
+        with load_test_resource("data/wrong_magic_number.gdf") as f:
             with self.assertRaises(easygdf.GDFIOError):
                 easygdf.load(f)
 
@@ -285,7 +279,7 @@ class TestEasyGDFLoad(unittest.TestCase):
         :return:
         """
         # Attempt to open the file with the method under test
-        with pkg_resources.resource_stream("easygdf.tests", "data/null_array.gdf") as f:
+        with load_test_resource("data/null_array.gdf") as f:
             with self.assertRaises(TypeError):
                 easygdf.load(f)
 
@@ -321,7 +315,7 @@ class TestEasyGDFSave(unittest.TestCase):
         # Read it back and read back the reference file
         with open(test_file, "rb") as f:
             test_data = bytearray(f.read())
-        with pkg_resources.resource_stream("easygdf.tests", "data/test.gdf") as f:
+        with load_test_resource("data/test.gdf") as f:
             reference_data = bytearray(f.read())
 
         # Blank out the last bit of the string buffers that weren't written with zeros in the reference copy
@@ -375,7 +369,7 @@ class TestEasyGDFSave(unittest.TestCase):
         # Read it back and read back the reference file
         with open(test_file, "rb") as f:
             test_data = bytearray(f.read())
-        with pkg_resources.resource_stream("easygdf.tests", "data/test.gdf") as f:
+        with load_test_resource("data/test.gdf") as f:
             reference_data = bytearray(f.read())
 
         # Blank out the last bit of the string buffers that weren't written with zeros in the reference copy
@@ -593,7 +587,7 @@ class TestEasyGDFSave(unittest.TestCase):
         testfile = os.path.join(tempfile.gettempdir(), "save_bad_numpy_dtype.gdf")
         with open(testfile, "wb") as f:
             with self.assertRaises(TypeError):
-                easygdf.save(f, [{"value": np.linspace(0, 5, 6, dtype=np.complex)}])
+                easygdf.save(f, [{"value": np.linspace(0, 5, 6, dtype=complex)}])
 
     def test_int_single_overflow(self):
         """
@@ -645,7 +639,7 @@ class TestEasyGDFLoadSave(unittest.TestCase):
         :return: None
         """
         # Open up one of our test problems
-        with pkg_resources.resource_stream("easygdf.tests", "data/test.gdf") as f:
+        with load_test_resource("data/test.gdf") as f:
             all_data = easygdf.load(f)
 
         # Save it again
