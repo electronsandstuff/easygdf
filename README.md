@@ -4,7 +4,6 @@
 [![](https://anaconda.org/conda-forge/easygdf/badges/version.svg)](https://anaconda.org/conda-forge/easygdf)
 [![](https://img.shields.io/pypi/pyversions/easygdf.svg)](https://pypi.org/pypi/easygdf/)
 [![](https://img.shields.io/pypi/l/easygdf.svg)](https://pypi.org/pypi/easygdf/)
-[![](https://img.shields.io/pypi/l/easygdf.svg)](https://pypi.org/pypi/easygdf/)
 
 ![Header Image](media/header_image.PNG)
 
