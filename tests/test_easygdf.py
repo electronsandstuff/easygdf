@@ -593,7 +593,7 @@ class TestEasyGDFSave(unittest.TestCase):
         testfile = os.path.join(tempfile.gettempdir(), "save_bad_numpy_dtype.gdf")
         with open(testfile, "wb") as f:
             with self.assertRaises(TypeError):
-                easygdf.save(f, [{"value": np.linspace(0, 5, 6, dtype=np.complex)}])
+                easygdf.save(f, [{"value": np.linspace(0, 5, 6, dtype=complex)}])
 
     def test_int_single_overflow(self):
         """
