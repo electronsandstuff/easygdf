@@ -1,6 +1,6 @@
 [project]
 name = "easygdf"
-version = "2.0.8"
+version = "2.0.9"
 authors = [
   { name="Christopher M. Pierce", email="contact@chris-pierce.com" },
 ]
@@ -15,11 +15,6 @@ classifiers = [
 ]
 dependencies = [
   "numpy",
-]
-
-[project.optional-dependencies]
-tests = [
-  'pytest',
 ]
 
 [tool.setuptools.package-data]
