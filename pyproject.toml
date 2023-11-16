@@ -1,0 +1,29 @@
+[project]
+name = "easygdf"
+version = "2.0.7"
+authors = [
+  { name="Christopher M. Pierce", email="contact@chris-pierce.com" },
+]
+description="A python library to make working with GDF files a breeze."
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE.txt"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License",
+]
+dependencies = [
+  "numpy",
+]
+
+[project.optional-dependencies]
+tests = [
+  'pytest',
+]
+
+[tool.setuptools.package-data]
+easygdf = ["data/*"]
+
+[project.urls]
+Homepage = "https://github.com/electronsandstuff/easygdf"
