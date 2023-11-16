@@ -1,1 +1,2 @@
-recursive-include src *.py *.gdf
+recursive-include src *.gdf
+recursive-include tests *.gdf
