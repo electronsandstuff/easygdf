@@ -1,6 +1,6 @@
 [project]
 name = "easygdf"
-version = "2.0.7"
+version = "2.0.8"
 authors = [
   { name="Christopher M. Pierce", email="contact@chris-pierce.com" },
 ]
