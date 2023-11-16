@@ -9,6 +9,8 @@ import pkg_resources
 
 import easygdf
 
+from .utils import load_test_resource
+
 
 class TestEasyGDFScreensTouts(unittest.TestCase):
     def setUp(self):
@@ -61,7 +63,7 @@ class TestEasyGDFScreensTouts(unittest.TestCase):
 
     def test_load_screens_touts(self):
         # Try to load the file
-        with pkg_resources.resource_stream("easygdf.tests", "data/screens_touts.gdf") as f:
+        with load_test_resource("data/screens_touts.gdf") as f:
             all_data = easygdf.load_screens_touts(f)
 
         # Ditch the header
@@ -329,7 +331,7 @@ class TestEasyGDFScreensTouts(unittest.TestCase):
         :return:
         """
         # Load a file
-        with pkg_resources.resource_stream("easygdf.tests", "data/screens_touts.gdf") as f:
+        with load_test_resource("data/screens_touts.gdf") as f:
             all_data = easygdf.load_screens_touts(f)
 
         # Try to save it
@@ -342,5 +344,5 @@ class TestEasyGDFScreensTouts(unittest.TestCase):
         Tests screen normalization with a file that has a float in screen.  This test added as part of pull-request 2
         """
         # Load a file
-        with pkg_resources.resource_stream("easygdf.tests", "data/normalize_screen_floats.gdf") as f:
+        with load_test_resource("data/normalize_screen_floats.gdf") as f:
             all_data = easygdf.load_screens_touts(f)

@@ -10,6 +10,8 @@ import pkg_resources
 
 import easygdf
 
+from .utils import load_test_resource
+
 
 class TestEasyGDFInitialDistribution(unittest.TestCase):
     def setUp(self):
@@ -63,7 +65,7 @@ class TestEasyGDFInitialDistribution(unittest.TestCase):
 
     def test_load(self):
         # Try to load the file
-        with pkg_resources.resource_stream("easygdf.tests", "data/initial_distribution.gdf") as f:
+        with load_test_resource("data/initial_distribution.gdf") as f:
             all_data = easygdf.load_initial_distribution(f)
 
         # Confirm that the keys are the same
@@ -165,7 +167,7 @@ class TestEasyGDFInitialDistribution(unittest.TestCase):
 
     def test_uniform_interface(self):
         # Try to load the file
-        with pkg_resources.resource_stream("easygdf.tests", "data/initial_distribution.gdf") as f:
+        with load_test_resource("data/initial_distribution.gdf") as f:
             all_data = easygdf.load_initial_distribution(f)
 
         # Directly save it
