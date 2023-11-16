@@ -95,11 +95,10 @@ those values with zeros for you to produce a valid output.  Certain parameters (
 will be filled with appropriate non-zero values ([1,2,3,4,...] in this case).
 
 ## Testing
-Developers may use the python script `run_all_tests.py` to execute all unit tests in the project.  These tests are also
-distributed with the library and are available to end users.  They may be run on a system where easyGDF is installed
-using the following command.
+This project uses the `unittest` framework. Please run the tests in this project by running the following command at the
+root of this repository.
 ```
-$ python -m unittest easygdf.tests
+$ python -m unittest
 ```
 If you are contributing to the library (Thank you!) please make sure your PR passes the full test suite.  In addition,
 please add unit tests during bugfixes that will fail on the bug being repaired.  For feature additions please add test
