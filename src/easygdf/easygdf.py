@@ -366,7 +366,7 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
 
         # Track block metadata for logging
         value_type = None
-        value_info = None
+        value_info = ""
         bytes_written = 0
 
         block_type_flag = 0
@@ -411,7 +411,7 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
             bval.tofile(f)
             bytes_written = len(header) + block_size
             value_type = "numpy"
-            value_info = f"type={dname} elements={bval.size}"
+            value_info = f"type={dname}, elements={bval.size}"
 
         # If we aren't an array then we are a single value
         else:
@@ -428,7 +428,6 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
                 f.write(data)
                 bytes_written = len(data)
                 value_type = "string"
-                value_info = f"len={block_size}"
 
             elif isinstance(block["value"], int):
                 if block["value"] > 0:
@@ -469,7 +468,6 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
                 f.write(data)
                 bytes_written = len(data)
                 value_type = "null"
-                value_info = "size=0"
 
             else:
                 err_msg = f'Cannot write data type "{type(block["value"])}" to GDF file'
@@ -488,9 +486,11 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
             flags.append("Single")
         flags = ", ".join(flags)
 
+        if value_info:
+            value_info = value_info + ", "
         logger.debug(
-            f"level {level} - Block[{block_count:04d}] '{block['name']}' type=0x{block_type_flag:x} ({value_type}) "
-            f"size={block_size} bytes {value_info} flags=[{flags}] time={1e3*block_time:.3f}ms"
+            f"Wrote level {level} block {block_count} \"{block['name']}\" in {1e3*block_time:.3f}ms "
+            f"(type=0x{block_type_flag:x} ({value_type}), size={block_size} bytes, {value_info}flags=[{flags}])"
         )
 
         total_bytes_written += bytes_written
