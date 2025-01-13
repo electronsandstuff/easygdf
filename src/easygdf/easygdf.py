@@ -116,10 +116,13 @@ def is_gdf(f):
     # Rewind the file to the beginning
     f.seek(0)
 
-    # Get the magic number
-    magic_number, = struct.unpack('i', f.read(4))
+    # Check if file has enough bytes to contain magic number
+    if f.read(4) == b'':
+        return False
 
-    # Check it against the real magic number
+    # Rewind again to read the magic number
+    f.seek(0)
+    magic_number, = struct.unpack('i', f.read(4))
     return magic_number == GDF_MAGIC
 
 
