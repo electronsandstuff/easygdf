@@ -206,7 +206,7 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
         # Log this block
         logger.debug(
             f"level {level} - Block[{block_count:04d}] '{block_name}' "
-            f"type=0x{dtype:x} ({value_type}) size={block_size} {value_info} "
+            f"type=0x{dtype:x} ({value_type}) size={block_size} bytes {value_info} "
             f"flags=[{flags}] time={block_time:.3f}s"
         )
 
@@ -493,7 +493,7 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
 
         logger.debug(
             f"level {level} - Block[{block_count:04d}] '{block['name']}' type=0x{block_type_flag:x} ({value_type}) "
-            f"size={block_size} {value_info} flags=[{flags}] time={block_time:.3f}s"
+            f"size={block_size} bytes {value_info} flags=[{flags}] time={block_time:.3f}s"
         )
 
         total_bytes_written += bytes_written
