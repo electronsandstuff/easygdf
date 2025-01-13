@@ -16,7 +16,6 @@ from .constants import (
     GDF_MAGIC,
 )
 from .easygdf import (
-    is_gdf,
     load,
     save,
 )
@@ -25,6 +24,7 @@ from .screens_touts import load_screens_touts, save_screens_touts
 from .utils import (
     get_example_screen_tout_filename,
     get_example_initial_distribution,
+    is_gdf,
 )
 from .exceptions import (
     GDFError,

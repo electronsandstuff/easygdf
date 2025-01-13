@@ -4,6 +4,7 @@ import numpy as np
 import struct
 import warnings
 
+from .utils import is_gdf
 from .exceptions import GDFIOError
 from .constants import (
     GDF_NAME_LEN,
@@ -23,33 +24,6 @@ from .constants import (
     GDF_SINGLE,
     GDF_ARRAY,
 )
-
-
-def is_gdf(f):
-    """
-    Determines if a file is GDF formatted or not.
-
-    If binary file is passed, file will be at location four bytes from start after this function is run.
-
-    :param f: filename or open file/stream-like object
-    :return: True/False whether the file is GDF formatted
-    """
-    # If we were handed a string, then run this function on it with the file opened
-    if isinstance(f, str):
-        with open(f, "rb") as ff:
-            return is_gdf(ff)
-
-    # Rewind the file to the beginning
-    f.seek(0)
-
-    # Check if file has enough bytes to contain magic number
-    if len(f.read(4)) != 4:
-        return False
-
-    # Rewind again to read the magic number
-    f.seek(0)
-    (magic_number,) = struct.unpack("i", f.read(4))
-    return magic_number == GDF_MAGIC
 
 
 def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
