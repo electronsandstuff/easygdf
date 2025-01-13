@@ -203,7 +203,7 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
         if value_info:
             value_info = value_info + ", "
         logger.debug(
-            f'Read level {level} block {block_count} "{block_name}" in {1e3*block_time:.3f} ms'
+            f'Read block at level {level}, index {block_count} "{block_name}" in {1e3*block_time:.3f} ms'
             f" (type=0x{dtype:x} ({value_type}), size={block_size} bytes, {value_info}flags=[{flags}])"
         )
 
@@ -489,7 +489,7 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
         if value_info:
             value_info = value_info + ", "
         logger.debug(
-            f"Wrote level {level} block {block_count} \"{block['name']}\" in {1e3*block_time:.3f}ms "
+            f"Wrote block at level {level}, index {block_count} \"{block['name']}\" in {1e3*block_time:.3f}ms "
             f"(type=0x{block_type_flag:x} ({value_type}), size={block_size} bytes, {value_info}flags=[{flags}])"
         )
 
