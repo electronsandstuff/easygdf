@@ -6,7 +6,7 @@ authors = [
 ]
 description="A python library to make working with GDF files a breeze."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 license = {file = "LICENSE.txt"}
 classifiers = [
     "Programming Language :: Python :: 3",
