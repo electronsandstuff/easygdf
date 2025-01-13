@@ -1,7 +1,7 @@
+import numpy as np
 import os
 import tempfile
 import unittest
-import numpy as np
 import easygdf
 
 from .utils import load_test_resource
