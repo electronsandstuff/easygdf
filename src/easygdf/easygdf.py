@@ -244,20 +244,33 @@ def load(f, max_recurse=16, max_block=1e6):
     :param max_block: Maximum number of blocks allowed in each GDF group
     :return: dict of GDF data (see description)
     """
+    start_time = time.perf_counter()
+
     # If we were handed a string, then run this function on it with the file opened
     if isinstance(f, str):
+        logger.debug(f"Opening file: {f}")
         with open(f, "rb") as ff:
             return load(ff, max_recurse=max_recurse, max_block=max_block)
 
     # Make sure we have got a GDF file opened in binary mode
     if not isinstance(f, io.BufferedReader):
-        raise GDFIOError(f"f must be file-like or a string not '{type(f)}'")
+        err_msg = f"f must be file-like or a string not '{type(f)}'"
+        logger.error(err_msg)
+        raise GDFIOError(err_msg)
 
-    f.read(1)  # Trigger any IO errors here
+    try:
+        f.read(1)  # Trigger any IO errors here
+    except IOError as e:
+        logger.error(f"Failed to read file: {str(e)}")
+        raise
+
     if not is_gdf(f):
-        raise GDFIOError("Input is not a GDF file")
+        err_msg = "Input is not a GDF file"
+        logger.error(err_msg)
+        raise GDFIOError(err_msg)
 
     # Read the GDF file header
+    header_start = time.perf_counter()
     f.seek(0)
     fh_raw = struct.unpack("2i{0}s{0}s8B".format(GDF_NAME_LEN), f.read(48))
     ret = {
@@ -269,17 +282,30 @@ def load(f, max_recurse=16, max_block=1e6):
         "destination_version": (fh_raw[8], fh_raw[9]),
         "dummy": (fh_raw[10], fh_raw[11]),
     }
+    header_time = time.perf_counter() - header_start
+
+    logger.debug(
+        f"GDF header loaded time={header_time:.3f}s gdf_version={ret['gdf_version']} "
+        f"creator='{ret['creator']}' creator_version={ret['creation_time'].isoformat()}"
+    )
 
     # If the GDF version is too new, then give a warning
     v = ret["gdf_version"]
     if v[0] != 1 or v[1] != 1:
-        warnings.warn(
-            "Attempting to open GDF v{:d}.{:d} file. easygdf has only been tested on GDF v1.1 files. "
-            "Please report any issues to project maintainer at contact@chris-pierce.com".format(v[0], v[1])
+        warning_msg = (
+            f"Attempting to open GDF v{v[0]}.{v[1]} file. easygdf has only been tested on GDF v1.1 files. "
+            "Please report any issues to project maintainer at contact@chris-pierce.com"
         )
+        logger.warning(warning_msg)
+        warnings.warn(warning_msg)
 
     # Load all the groups and return
     ret["blocks"] = load_blocks(f, max_recurse=max_recurse, max_block=max_block)
+    total_time = time.perf_counter() - start_time
+
+    logger.info(
+        f"Loaded GDF file in {total_time:.3f} seconds (root_blocks={len(ret['blocks'])}, file_version={v[0]}.{v[1]})"
+    )
     return ret
 
 
