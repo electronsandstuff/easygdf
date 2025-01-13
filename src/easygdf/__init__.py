@@ -1,4 +1,4 @@
-from .easygdf import (
+from .constants import (
     GDF_ASCII,
     GDF_DOUBLE,
     GDF_FLOAT,
@@ -14,6 +14,8 @@ from .easygdf import (
     GDF_UNDEFINED,
     GDF_NAME_LEN,
     GDF_MAGIC,
+)
+from .easygdf import (
     is_gdf,
     load,
     save,
