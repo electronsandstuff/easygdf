@@ -498,7 +498,9 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
 
         # Recurse on the children of this block
         if len(block["children"]) != 0:
-            save_blocks(f, block["children"], level=level + 1, max_recurse=max_recurse)
+            child_bytes, child_blocks = save_blocks(f, block["children"], level=level + 1, max_recurse=max_recurse)
+            total_bytes_written += child_bytes
+            block_count += child_blocks
 
     # If we are not the root group, then write a group end block
     if level > 0:
@@ -600,13 +602,15 @@ def save(
         dummy[1],
     )
     f.write(header)
+    total_bytes = len(header)
     logger.debug(
-        f"Wrote GDF header ({len(header)} bytes): version={gdf_version[0]}.{gdf_version[1]} creator='{creator}'"
+        f"Wrote GDF header ({total_bytes} bytes): version={gdf_version[0]}.{gdf_version[1]} creator='{creator}'"
     )
 
     # Save the root group and then recurse (inside function)
-    total_bytes, total_blocks = save_blocks(f, blocks, max_recurse=max_recurse)
+    block_bytes, total_blocks = save_blocks(f, blocks, max_recurse=max_recurse)
     total_time = time.perf_counter() - start_time
+    total_bytes += block_bytes
 
     logger.info(
         f"Saved GDF file in {1e3*total_time:.3f} ms (root_blocks={len(blocks)}, total_blocks={total_blocks}, bytes_written={total_bytes})"
