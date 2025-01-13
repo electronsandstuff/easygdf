@@ -4,7 +4,7 @@ import numpy as np
 import struct
 import warnings
 
-from .utils import GDFIOError
+from .exceptions import GDFIOError
 from .constants import (
     GDF_NAME_LEN,
     GDF_MAGIC,

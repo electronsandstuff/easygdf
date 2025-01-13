@@ -19,11 +19,3 @@ def get_example_initial_distribution():
     :return: Path to the example file
     """
     return str(files("easygdf").joinpath("data/initial_distribution.gdf"))
-
-
-class GDFError(Exception):
-    pass
-
-
-class GDFIOError(GDFError):
-    pass
