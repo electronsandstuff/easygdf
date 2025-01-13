@@ -1,7 +1,9 @@
 import datetime
 import io
+import logging
 import numpy as np
 import struct
+import time
 import warnings
 
 from .utils import is_gdf
@@ -25,6 +27,8 @@ from .constants import (
     GDF_ARRAY,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
     """
@@ -37,17 +41,26 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
     :param max_block: Maximum number of blocks that are allowed in this group before easyGDF throws error
     :return: list of blocks in this group
     """
+    # Track statistics for logging
+    total_bytes_read = 0
+    block_count = 0
+
     # If we have hit the max recursion depth throw an error
     if level >= max_recurse:
-        raise RecursionError("Max GDF depth of recursion (set to {:d}) exceeded".format(max_recurse))
+        err_msg = f"Max GDF depth of recursion (set to {max_recurse}) exceeded at level {level}"
+        logger.error(err_msg)
+        raise RecursionError(err_msg)
 
     # Make a place for the blocks
     blocks = []
 
     # Loop over the blocks
     for _ in range(int(max_block)):
+        block_start_time = time.perf_counter()
+
         # Read the block's header
         header_raw = f.read(GDF_NAME_LEN + 8)
+        total_bytes_read += len(header_raw)
 
         # If no data came back and we are in the root group, then break.  If this isn't root group, then something
         # went wrong.
@@ -55,7 +68,9 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
             if level == 0:
                 break
             else:
-                raise IOError("File ended in middle of GDF group")
+                err_msg = "File ended in middle of GDF group"
+                logger.error(err_msg)
+                raise IOError(err_msg)
 
         # Unpack the header
         block_name, block_type_flag, block_size = struct.unpack("{0}sii".format(GDF_NAME_LEN), header_raw)
@@ -68,17 +83,17 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
         group_begin = bool(block_type_flag & GDF_GROUP_BEGIN)
         group_end = bool(block_type_flag & GDF_GROUP_END)
         if group_begin and group_end:
-            raise ValueError(
-                "Potentially invalid group flags in block " '("group_begin" = {0} "group_end" = {1}'.format(
-                    group_begin, group_end
-                )
-            )
+            err_msg = f"Invalid group flags in block '{block_name}': begin={group_begin}, end={group_end}"
+            logger.error(err_msg)
+            raise ValueError(err_msg)
 
         # If this is a group end block, then break out of the loop.  If this end block was encountered in root, then
         # something went wrong and throw an error
         if group_end:
             if level == 0:
-                raise ValueError('Encountered "group end" block in GDF file, but we were not inside of a group')
+                err_msg = 'Encountered "group end" block in GDF file root level'
+                logger.error(err_msg)
+                raise ValueError(err_msg)
             else:
                 break
 
@@ -89,67 +104,111 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
         dtype = block_type_flag & GDF_DTYPE
         single = bool(block_type_flag & GDF_SINGLE)
         array = bool(block_type_flag & GDF_ARRAY)
+
+        value_type = None
+        value_info = None
+
         if single and not array:
             # If we can use struct to convert the type
             if dtype in GDF_DTYPES_STRUCT:
-                # Confirm that the size is what we expect
                 if block_size != GDF_DTYPES_STRUCT[dtype][1]:
-                    raise ValueError(
-                        "Potentially bad block size (expected {:d} bytes, got {:d} bytes)".format(
-                            GDF_DTYPES_STRUCT[dtype][1], block_size
-                        )
-                    )
+                    err_msg = f"Block size mismatch for '{block_name}': expected {GDF_DTYPES_STRUCT[dtype][1]} bytes, got {block_size} bytes"
+                    logger.error(err_msg)
+                    raise ValueError(err_msg)
 
-                # Pull the data from the file and convert to the parameter
-                (block["value"],) = struct.unpack(GDF_DTYPES_STRUCT[dtype][0], f.read(block_size))
+                data = f.read(block_size)
+                total_bytes_read += block_size
+                (block["value"],) = struct.unpack(GDF_DTYPES_STRUCT[dtype][0], data)
+                value_type = "struct"
+                value_info = GDF_DTYPES_STRUCT[dtype][0]
 
             # If it is a string, pull it out and decode
             elif dtype == GDF_ASCII:
-                block["value"] = f.read(block_size).split(b"\0", 1)[0].decode("ascii")
+                data = f.read(block_size)
+                total_bytes_read += block_size
+                block["value"] = data.split(b"\0", 1)[0].decode("ascii")
+                value_type = "ASCII"
+                value_info = f"len={len(block['value'])}"
 
             # If it is null, put a None object and fast forward through the file by the block size
             elif dtype == GDF_NULL:
                 block["value"] = None
                 f.seek(block_size, 1)  # Second parameter of 1 means seek relative to current position
+                total_bytes_read += block_size
+                value_type = "null"
+                value_info = f"skip={block_size}"
 
             # If it was an undefined data type, then take the raw bytes object
             elif dtype == GDF_UNDEFINED:
                 block["value"] = f.read(block_size)
+                total_bytes_read += block_size
+                value_type = "undefined"
+                value_info = f"bytes={block_size}"
 
             # If we didn't understand the data type, then throw an error
             else:
-                raise TypeError("Unrecognized single parameter data type ID (ID number 0x{:x})".format(dtype))
+                err_msg = f"Unrecognized single parameter data type ID (0x{dtype:x})"
+                logger.error(err_msg)
+                raise TypeError(err_msg)
 
         elif array and not single:
             # If we can find a compatible numpy type
             if dtype in GDF_DTYPES_NUMPY:
-                # Confirm that the size is what we expect (array is even multiple of type size)
                 if block_size % GDF_DTYPES_NUMPY[dtype][1] != 0:
-                    raise ValueError(
-                        "Potentially bad block size in array (expected multiple of {:d} bytes,"
-                        " got {:d} bytes)".format(GDF_DTYPES_NUMPY[dtype][1], block_size)
-                    )
+                    err_msg = f"Invalid array block size for '{block_name}': {block_size} bytes is not multiple of element size {GDF_DTYPES_NUMPY[dtype][1]}"
+                    logger.error(err_msg)
+                    raise ValueError(err_msg)
 
-                # Pull the data from the file and convert to the parameter
                 block["value"] = np.fromfile(
                     f, dtype=GDF_DTYPES_NUMPY[dtype][0], count=block_size // GDF_DTYPES_NUMPY[dtype][1]
                 )
+                total_bytes_read += block_size
+                value_type = "numpy"
+                value_info = f"type={GDF_DTYPES_NUMPY[dtype][0]} | elements={len(block['value'])}"
 
-            # If it is null, then I don't know how to interpret it as an array so through an error
+            # If it is null, then I don't know how to interpret it as an array so throw an error
             elif dtype == GDF_NULL:
-                raise TypeError("Cannot interpret array block parameter with null data type")
+                err_msg = "Cannot interpret array block parameter with null data type"
+                logger.error(err_msg)
+                raise TypeError(err_msg)
 
             # If it was an undefined data type, then take the raw bytes object
             elif dtype == GDF_UNDEFINED:
                 block["value"] = f.read(block_size)
+                total_bytes_read += block_size
+                value_type = "undefined array"
+                value_info = f"bytes={block_size}"
 
             # If we didn't understand the data type, then throw an error
             else:
-                raise TypeError("Unrecognized array parameter data type ID (ID number {:d})".format(dtype))
+                err_msg = f"Unrecognized array parameter data type ID (0x{dtype:x})"
+                logger.error(err_msg)
+                raise TypeError(err_msg)
 
         # Something went wrong (single and array are both true or both false)
         else:
-            raise ValueError('invalid block flags ("single" = {0}, "array" = {1})'.format(single, array))
+            err_msg = f"Invalid block flags for '{block_name}': single={single}, array={array}"
+            logger.error(err_msg)
+            raise ValueError(err_msg)
+
+        block_time = time.perf_counter() - block_start_time
+
+        # Handle flags
+        flags = []
+        if group_begin:
+            flags.append("Group")
+        if array:
+            flags.append("Array")
+        if single:
+            flags.append("Single")
+        flags = ", ".join(flags)
+
+        # Log this block
+        logger.debug(
+            f"level {level} - Block[{block_count:04d}] '{block_name}' "
+            f"type=0x{dtype:x} ({value_type}) size={block_size} {value_info} "
+            f"flags=[{flags}] time={block_time:.3f}s"
+        )
 
         # If we have children then recurse to get them
         if group_begin:
@@ -157,6 +216,7 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
 
         # Add this block to the list
         blocks.append(block)
+        block_count += 1
 
     # Return the list of blocks when we are done
     return blocks
