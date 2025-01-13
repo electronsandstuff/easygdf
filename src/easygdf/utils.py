@@ -22,6 +22,7 @@ def get_example_initial_distribution():
     """
     return str(files("easygdf").joinpath("data/initial_distribution.gdf"))
 
+
 class GDFError(Exception):
     pass
 

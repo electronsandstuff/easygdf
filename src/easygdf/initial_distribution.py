@@ -34,10 +34,34 @@ def load_initial_distribution(f, max_recurse=16, max_block=1e6):
     return out
 
 
-def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz=None, Bx=None, By=None, Bz=None,
-                              t=None, G=None, m=None, q=None, nmacro=None, rmacro=None, ID=None, creation_time=None,
-                              creator="easygdf", destination="", gdf_version=(1, 1), creator_version=(2, 0),
-                              destination_version=(0, 0), dummy=(0, 0), max_recurse=16, **kwargs):
+def save_initial_distribution(
+    f,
+    x=None,
+    y=None,
+    z=None,
+    GBx=None,
+    GBy=None,
+    GBz=None,
+    Bx=None,
+    By=None,
+    Bz=None,
+    t=None,
+    G=None,
+    m=None,
+    q=None,
+    nmacro=None,
+    rmacro=None,
+    ID=None,
+    creation_time=None,
+    creator="easygdf",
+    destination="",
+    gdf_version=(1, 1),
+    creator_version=(2, 0),
+    destination_version=(0, 0),
+    dummy=(0, 0),
+    max_recurse=16,
+    **kwargs,
+):
     """
     Saves GPT compatible initial distribution file.  All array objects must be the same length (IE the number of
     particles).  If required values (either {x,y,z,GBx,GBy,GBz} or {x,y,z,Bx,By,Bz}) are missing, easyGDF will autofill
@@ -72,8 +96,24 @@ def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz
     :return: None
     """
     # Copy all array elements into dict for processing and get rid of Nones
-    data_raw = {"x": x, "y": y, "z": z, "GBx": GBx, "GBy": GBy, "GBz": GBz, "Bx": Bx, "By": By, "Bz": Bz, "t": t,
-                "G": G, "m": m, "q": q, "nmacro": nmacro, "rmacro": rmacro, "ID": ID}
+    data_raw = {
+        "x": x,
+        "y": y,
+        "z": z,
+        "GBx": GBx,
+        "GBy": GBy,
+        "GBz": GBz,
+        "Bx": Bx,
+        "By": By,
+        "Bz": Bz,
+        "t": t,
+        "G": G,
+        "m": m,
+        "q": q,
+        "nmacro": nmacro,
+        "rmacro": rmacro,
+        "ID": ID,
+    }
     data_raw.update(kwargs)
     data = {x: data_raw[x] for x in data_raw if data_raw[x] is not None}
 
@@ -104,6 +144,15 @@ def save_initial_distribution(f, x=None, y=None, z=None, GBx=None, GBy=None, GBz
     blocks = [{"name": x, "value": data[x]} for x in data]
 
     # Save the blocks
-    easygdf.save(f, blocks, creation_time=creation_time, creator=creator, destination=destination,
-                 gdf_version=gdf_version, creator_version=creator_version, destination_version=destination_version,
-                 dummy=dummy, max_recurse=max_recurse)
+    easygdf.save(
+        f,
+        blocks,
+        creation_time=creation_time,
+        creator=creator,
+        destination=destination,
+        gdf_version=gdf_version,
+        creator_version=creator_version,
+        destination_version=destination_version,
+        dummy=dummy,
+        max_recurse=max_recurse,
+    )

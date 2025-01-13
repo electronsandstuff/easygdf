@@ -62,11 +62,11 @@ def round_sigfigs(x, sigfigs):
             omags -= 1.0
 
     else:  # elif np.all(np.isreal( mantissas )):
-        fixmsk = mantissas < 1.0,
+        fixmsk = (mantissas < 1.0,)
         mantissas[fixmsk] *= 10.0
         omags[fixmsk] -= 1.0
 
-    result = xsgn * np.around(mantissas, decimals=sigfigs - 1) * 10.0 ** omags
+    result = xsgn * np.around(mantissas, decimals=sigfigs - 1) * 10.0**omags
     if matrixflag:
         result = np.matrix(result, copy=False)
 
@@ -103,17 +103,11 @@ def trim_screens_tout():
     # Trim down the arrays to the correct number of particles
     particle_blocks = []
     for b in trimmed_blocks:
-        new_block = {
-            "name": b["name"],
-            "param": b["param"],
-            "children": []
-        }
+        new_block = {"name": b["name"], "param": b["param"], "children": []}
         for c in b["children"]:
-            new_block["children"].append({
-                "name": c["name"],
-                "param": round_sigfigs(c["param"][:n_particles], 4),
-                "children": []
-            })
+            new_block["children"].append(
+                {"name": c["name"], "param": round_sigfigs(c["param"][:n_particles], 4), "children": []}
+            )
         particle_blocks.append(new_block)
     d["blocks"] = particle_blocks
 
@@ -150,10 +144,7 @@ def trim_initial_distribution():
     trimmed_blocks = []
     for b in d["blocks"]:
         if isinstance(b["param"], np.ndarray):
-            trimmed_blocks.append({
-                "name": b["name"],
-                "param": round_sigfigs(b["param"][:n_particles], 4)
-            })
+            trimmed_blocks.append({"name": b["name"], "param": round_sigfigs(b["param"][:n_particles], 4)})
     d["blocks"] = trimmed_blocks
 
     # Save the file

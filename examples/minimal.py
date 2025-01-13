@@ -5,7 +5,7 @@ import numpy as np
 blocks = [
     {"name": "an array", "value": np.array([0, 1, 2, 3])},
     {"name": "a string", "value": "Hello world!"},
-    {"name": "a group", "value": 3.14, "children": [{"name": "child", "value": 1.0}]}
+    {"name": "a group", "value": 3.14, "children": [{"name": "child", "value": 1.0}]},
 ]
 easygdf.save("minimal.gdf", blocks)
 
