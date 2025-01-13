@@ -11,21 +11,30 @@ class TestEasyGDFHelpers(unittest.TestCase):
         
         with load_test_resource("data/test.gdf") as f:
             is_gdf = easygdf.is_gdf(f)
-        self.assertEqual(is_gdf, True)
+        self.assertTrue(is_gdf, True)
 
         # Try to open one of the text files
         with load_test_resource("test_easygdf.py") as f:
             is_gdf = easygdf.is_gdf(f)
-        self.assertEqual(is_gdf, False)
+        self.assertFalse(is_gdf)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create an empty file in the temp directory
+            empty_file_path = os.path.join(temp_dir, "empty.gdf")
+            with open(empty_file_path, 'wb') as f:
+                pass
+            
+            # Test the empty file
+            self.assertFalse(easygdf.is_gdf(empty_file_path))
 
     def test_is_gdf_str_URI(self):
         # Attempt to open the file and use the method under test
         is_gdf = easygdf.is_gdf(os.path.join(os.path.dirname(os.path.realpath(__file__)), "data/test.gdf"))
-        self.assertEqual(is_gdf, True)
+        self.assertTrue(is_gdf)
 
         # Try to open one of the text files
         is_gdf = easygdf.is_gdf(os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_easygdf.py"))
-        self.assertEqual(is_gdf, False)
+        self.assertFalse(is_gdf)
 
 
 class TestEasyGDFLoad(unittest.TestCase):
@@ -402,7 +411,7 @@ class TestEasyGDFSave(unittest.TestCase):
         ref_blocks = []
 
         # Dump all of the possible numpy array types into blocks
-        dtypes = ["int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64", "float_",
+        dtypes = ["int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64",
                   "float32", "float64"]
         for dtype in dtypes:
             ref_blocks.append({
