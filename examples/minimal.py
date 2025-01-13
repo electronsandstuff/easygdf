@@ -1,5 +1,13 @@
 import easygdf
 import numpy as np
+import logging
+
+# Setup logging so we can watch what the library is doing
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 # Let's write an example file with a variety of data types
 blocks = [
