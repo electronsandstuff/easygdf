@@ -106,7 +106,7 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
         array = bool(block_type_flag & GDF_ARRAY)
 
         value_type = None
-        value_info = None
+        value_info = ""
 
         if single and not array:
             # If we can use struct to convert the type
@@ -120,7 +120,6 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
                 total_bytes_read += block_size
                 (block["value"],) = struct.unpack(GDF_DTYPES_STRUCT[dtype][0], data)
                 value_type = "struct"
-                value_info = GDF_DTYPES_STRUCT[dtype][0]
 
             # If it is a string, pull it out and decode
             elif dtype == GDF_ASCII:
@@ -128,7 +127,6 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
                 total_bytes_read += block_size
                 block["value"] = data.split(b"\0", 1)[0].decode("ascii")
                 value_type = "ASCII"
-                value_info = f"len={len(block['value'])}"
 
             # If it is null, put a None object and fast forward through the file by the block size
             elif dtype == GDF_NULL:
@@ -143,7 +141,6 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
                 block["value"] = f.read(block_size)
                 total_bytes_read += block_size
                 value_type = "undefined"
-                value_info = f"bytes={block_size}"
 
             # If we didn't understand the data type, then throw an error
             else:
@@ -164,7 +161,7 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
                 )
                 total_bytes_read += block_size
                 value_type = "numpy"
-                value_info = f"type={GDF_DTYPES_NUMPY[dtype][0]} | elements={len(block['value'])}"
+                value_info = f"type={GDF_DTYPES_NUMPY[dtype][0]}, elements={len(block['value'])}"
 
             # If it is null, then I don't know how to interpret it as an array so throw an error
             elif dtype == GDF_NULL:
@@ -177,7 +174,6 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
                 block["value"] = f.read(block_size)
                 total_bytes_read += block_size
                 value_type = "undefined array"
-                value_info = f"bytes={block_size}"
 
             # If we didn't understand the data type, then throw an error
             else:
@@ -204,10 +200,11 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
         flags = ", ".join(flags)
 
         # Log this block
+        if value_info:
+            value_info = value_info + ", "
         logger.debug(
-            f"level {level} - Block[{block_count:04d}] '{block_name}' "
-            f"type=0x{dtype:x} ({value_type}) size={block_size} bytes {value_info} "
-            f"flags=[{flags}] time={block_time:.3f}s"
+            f'Read level {level} block {block_count} "{block_name}" in {1e3*block_time:.3f} ms'
+            f" (type=0x{dtype:x} ({value_type}), size={block_size} bytes, {value_info}flags=[{flags}])"
         )
 
         # If we have children then recurse to get them
@@ -304,7 +301,7 @@ def load(f, max_recurse=16, max_block=1e6):
     total_time = time.perf_counter() - start_time
 
     logger.info(
-        f"Loaded GDF file in {total_time:.3f} seconds (root_blocks={len(ret['blocks'])}, file_version={v[0]}.{v[1]})"
+        f"Loaded GDF file in {1e3*total_time:.3f} ms (root_blocks={len(ret['blocks'])}, file_version={v[0]}.{v[1]})"
     )
     return ret
 
@@ -493,7 +490,7 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
 
         logger.debug(
             f"level {level} - Block[{block_count:04d}] '{block['name']}' type=0x{block_type_flag:x} ({value_type}) "
-            f"size={block_size} bytes {value_info} flags=[{flags}] time={block_time:.3f}s"
+            f"size={block_size} bytes {value_info} flags=[{flags}] time={1e3*block_time:.3f}ms"
         )
 
         total_bytes_written += bytes_written
@@ -612,5 +609,5 @@ def save(
     total_time = time.perf_counter() - start_time
 
     logger.info(
-        f"Saved GDF file in {total_time:.3f} seconds (root_blocks={len(blocks)}, total_blocks={total_blocks}, bytes_written={total_bytes})"
+        f"Saved GDF file in {1e3*total_time:.3f} ms (root_blocks={len(blocks)}, total_blocks={total_blocks}, bytes_written={total_bytes})"
     )
