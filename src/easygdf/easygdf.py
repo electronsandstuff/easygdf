@@ -117,7 +117,7 @@ def is_gdf(f):
     f.seek(0)
 
     # Check if file has enough bytes to contain magic number
-    if f.read(4) == b'':
+    if len(f.read(4)) != 4:
         return False
 
     # Rewind again to read the magic number
