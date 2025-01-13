@@ -4,9 +4,7 @@ import datetime
 import os
 import tempfile
 import unittest
-
 import numpy as np
-import pkg_resources
 
 import easygdf
 
