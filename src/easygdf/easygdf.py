@@ -1,129 +1,29 @@
-#  This file is part of easygdf and is released under the BSD 3-clause license
-
-########################################################################################################################
-# Imports
-########################################################################################################################
 import datetime
 import io
+import numpy as np
 import struct
 import warnings
 
-import numpy as np
-
-from .utils import GDFIOError
-
-########################################################################################################################
-# GDF Specific Constants
-########################################################################################################################
-# Define constants for the GDF specification
-GDF_NAME_LEN = 16
-GDF_MAGIC = 94325877
-
-# The GDF data type identifiers
-GDF_ASCII = 0x0001
-GDF_DOUBLE = 0x0003
-GDF_FLOAT = 0x0090
-GDF_INT8 = 0x0030
-GDF_INT16 = 0x0050
-GDF_INT32 = 0x0002
-GDF_INT64 = 0x0080
-GDF_NULL = 0x0010
-GDF_UINT8 = 0x0020
-GDF_UINT16 = 0x0040
-GDF_UINT32 = 0x0060
-GDF_UINT64 = 0x0070
-GDF_UNDEFINED = 0x0000
-
-# Conversion from GDF types to information used by struct to convert into a python type.  First element of the tuple is
-# the identifier for conversion and the second element is the size required by struct (so we can double check the file)
-GDF_DTYPES_STRUCT = {
-    GDF_DOUBLE: ("d", 8),
-    GDF_FLOAT: ("f", 4),
-    GDF_INT8: ("b", 1),
-    GDF_INT16: ("h", 2),
-    GDF_INT32: ("i", 4),
-    GDF_INT64: ("q", 8),
-    GDF_UINT8: ("B", 1),
-    GDF_UINT16: ("H", 2),
-    GDF_UINT32: ("I", 4),
-    GDF_UINT64: ("Q", 8),
-}
-
-# The same conversion, but for going to numpy data types
-GDF_DTYPES_NUMPY = {
-    GDF_DOUBLE: (np.float64, 8),
-    GDF_FLOAT: (np.float32, 4),
-    GDF_INT8: (np.int8, 1),
-    GDF_INT16: (np.int16, 2),
-    GDF_INT32: (np.int32, 4),
-    GDF_INT64: (np.int64, 8),
-    GDF_UINT8: (np.uint8, 1),
-    GDF_UINT16: (np.uint16, 2),
-    GDF_UINT32: (np.uint32, 4),
-    GDF_UINT64: (np.uint64, 8),
-}
-
-# Going from numpy data types to GDF types
-NUMPY_TO_GDF = {
-    "int8": GDF_INT8,
-    "int16": GDF_INT16,
-    "int32": GDF_INT32,
-    "int64": GDF_INT64,
-    "uint8": GDF_UINT8,
-    "uint16": GDF_UINT16,
-    "uint32": GDF_UINT32,
-    "uint64": GDF_UINT64,
-    "float_": GDF_DOUBLE,
-    "float32": GDF_FLOAT,
-    "float64": GDF_DOUBLE,
-}
-
-# Detect platform specific data types for numpy
-for t in ["int_", "intc", "intp"]:
-    s = np.dtype(t).itemsize
-    if s == 4:
-        NUMPY_TO_GDF[t] = GDF_INT32
-    elif s == 8:
-        NUMPY_TO_GDF[t] = GDF_INT64
-    else:
-        raise ValueError("Unable to autodetect GDF flag for numpy data type \"{0}\" with size {1} bytes".format(t, s))
-
-# The bit masks for flags in the GDF header
-GDF_DTYPE = 255
-GDF_GROUP_BEGIN = 256
-GDF_GROUP_END = 512
-GDF_SINGLE = 1024
-GDF_ARRAY = 2048
-
-
-########################################################################################################################
-# Library functions start here
-########################################################################################################################
-def is_gdf(f):
-    """
-    Determines if a file is GDF formatted or not.
-
-    If binary file is passed, file will be at location four bytes from start after this function is run.
-
-    :param f: filename or open file/stream-like object
-    :return: True/False whether the file is GDF formatted
-    """
-    # If we were handed a string, then run this function on it with the file opened
-    if isinstance(f, str):
-        with open(f, "rb") as ff:
-            return is_gdf(ff)
-
-    # Rewind the file to the beginning
-    f.seek(0)
-
-    # Check if file has enough bytes to contain magic number
-    if len(f.read(4)) != 4:
-        return False
-
-    # Rewind again to read the magic number
-    f.seek(0)
-    magic_number, = struct.unpack('i', f.read(4))
-    return magic_number == GDF_MAGIC
+from .utils import is_gdf
+from .exceptions import GDFIOError
+from .constants import (
+    GDF_NAME_LEN,
+    GDF_MAGIC,
+    GDF_ASCII,
+    GDF_DOUBLE,
+    GDF_INT32,
+    GDF_NULL,
+    GDF_UINT32,
+    GDF_UNDEFINED,
+    GDF_DTYPES_STRUCT,
+    GDF_DTYPES_NUMPY,
+    NUMPY_TO_GDF,
+    GDF_DTYPE,
+    GDF_GROUP_BEGIN,
+    GDF_GROUP_END,
+    GDF_SINGLE,
+    GDF_ARRAY,
+)
 
 
 def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
@@ -145,13 +45,13 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
     blocks = []
 
     # Loop over the blocks
-    for block_ind in range(int(max_block)):
+    for _ in range(int(max_block)):
         # Read the block's header
         header_raw = f.read(GDF_NAME_LEN + 8)
 
         # If no data came back and we are in the root group, then break.  If this isn't root group, then something
         # went wrong.
-        if header_raw == b'':
+        if header_raw == b"":
             if level == 0:
                 break
             else:
@@ -159,7 +59,7 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
 
         # Unpack the header
         block_name, block_type_flag, block_size = struct.unpack("{0}sii".format(GDF_NAME_LEN), header_raw)
-        block_name = block_name.split(b'\0', 1)[0].decode('ascii')
+        block_name = block_name.split(b"\0", 1)[0].decode("ascii")
 
         # Make a new empty block with the correct name
         block = {"name": block_name, "value": None, "children": []}
@@ -168,14 +68,17 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
         group_begin = bool(block_type_flag & GDF_GROUP_BEGIN)
         group_end = bool(block_type_flag & GDF_GROUP_END)
         if group_begin and group_end:
-            raise ValueError("Potentially invalid group flags in block "
-                             "(\"group_begin\" = {0} \"group_end\" = {1}".format(group_begin, group_end))
+            raise ValueError(
+                "Potentially invalid group flags in block " '("group_begin" = {0} "group_end" = {1}'.format(
+                    group_begin, group_end
+                )
+            )
 
         # If this is a group end block, then break out of the loop.  If this end block was encountered in root, then
         # something went wrong and throw an error
         if group_end:
             if level == 0:
-                raise ValueError("Encountered \"group end\" block in GDF file, but we were not inside of a group")
+                raise ValueError('Encountered "group end" block in GDF file, but we were not inside of a group')
             else:
                 break
 
@@ -191,15 +94,18 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
             if dtype in GDF_DTYPES_STRUCT:
                 # Confirm that the size is what we expect
                 if block_size != GDF_DTYPES_STRUCT[dtype][1]:
-                    raise ValueError("Potentially bad block size (expected {:d} bytes, got {:d} bytes)".format(
-                        GDF_DTYPES_STRUCT[dtype][1], block_size))
+                    raise ValueError(
+                        "Potentially bad block size (expected {:d} bytes, got {:d} bytes)".format(
+                            GDF_DTYPES_STRUCT[dtype][1], block_size
+                        )
+                    )
 
                 # Pull the data from the file and convert to the parameter
-                block["value"], = struct.unpack(GDF_DTYPES_STRUCT[dtype][0], f.read(block_size))
+                (block["value"],) = struct.unpack(GDF_DTYPES_STRUCT[dtype][0], f.read(block_size))
 
             # If it is a string, pull it out and decode
             elif dtype == GDF_ASCII:
-                block["value"] = f.read(block_size).split(b'\0', 1)[0].decode('ascii')
+                block["value"] = f.read(block_size).split(b"\0", 1)[0].decode("ascii")
 
             # If it is null, put a None object and fast forward through the file by the block size
             elif dtype == GDF_NULL:
@@ -219,14 +125,14 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
             if dtype in GDF_DTYPES_NUMPY:
                 # Confirm that the size is what we expect (array is even multiple of type size)
                 if block_size % GDF_DTYPES_NUMPY[dtype][1] != 0:
-                    raise ValueError("Potentially bad block size in array (expected multiple of {:d} bytes,"
-                                     " got {:d} bytes)".format(GDF_DTYPES_NUMPY[dtype][1], block_size))
+                    raise ValueError(
+                        "Potentially bad block size in array (expected multiple of {:d} bytes,"
+                        " got {:d} bytes)".format(GDF_DTYPES_NUMPY[dtype][1], block_size)
+                    )
 
                 # Pull the data from the file and convert to the parameter
                 block["value"] = np.fromfile(
-                    f,
-                    dtype=GDF_DTYPES_NUMPY[dtype][0],
-                    count=block_size // GDF_DTYPES_NUMPY[dtype][1]
+                    f, dtype=GDF_DTYPES_NUMPY[dtype][0], count=block_size // GDF_DTYPES_NUMPY[dtype][1]
                 )
 
             # If it is null, then I don't know how to interpret it as an array so through an error
@@ -243,16 +149,11 @@ def load_blocks(f, level=0, max_recurse=16, max_block=1e6):
 
         # Something went wrong (single and array are both true or both false)
         else:
-            raise ValueError("invalid block flags (\"single\" = {0}, \"array\" = {1})".format(single, array))
+            raise ValueError('invalid block flags ("single" = {0}, "array" = {1})'.format(single, array))
 
         # If we have children then recurse to get them
         if group_begin:
-            block["children"] = load_blocks(
-                f,
-                level=level + 1,
-                max_recurse=max_recurse,
-                max_block=max_block
-            )
+            block["children"] = load_blocks(f, level=level + 1, max_recurse=max_recurse, max_block=max_block)
 
         # Add this block to the list
         blocks.append(block)
@@ -301,19 +202,21 @@ def load(f, max_recurse=16, max_block=1e6):
     fh_raw = struct.unpack("2i{0}s{0}s8B".format(GDF_NAME_LEN), f.read(48))
     ret = {
         "creation_time": datetime.datetime.fromtimestamp(fh_raw[1], tz=datetime.timezone.utc),
-        "creator": fh_raw[2].split(b'\0', 1)[0].decode('ascii'),
-        "destination": fh_raw[3].split(b'\0', 1)[0].decode('ascii'),
+        "creator": fh_raw[2].split(b"\0", 1)[0].decode("ascii"),
+        "destination": fh_raw[3].split(b"\0", 1)[0].decode("ascii"),
         "gdf_version": (fh_raw[4], fh_raw[5]),
         "creator_version": (fh_raw[6], fh_raw[7]),
         "destination_version": (fh_raw[8], fh_raw[9]),
-        "dummy": (fh_raw[10], fh_raw[11])
+        "dummy": (fh_raw[10], fh_raw[11]),
     }
 
     # If the GDF version is too new, then give a warning
     v = ret["gdf_version"]
     if v[0] != 1 or v[1] != 1:
-        warnings.warn("Attempting to open GDF v{:d}.{:d} file. easygdf has only been tested on GDF v1.1 files. "
-                      "Please report any issues to project maintainer at contact@chris-pierce.com".format(v[0], v[1]))
+        warnings.warn(
+            "Attempting to open GDF v{:d}.{:d} file. easygdf has only been tested on GDF v1.1 files. "
+            "Please report any issues to project maintainer at contact@chris-pierce.com".format(v[0], v[1])
+        )
 
     # Load all the groups and return
     ret["blocks"] = load_blocks(f, max_recurse=max_recurse, max_block=max_block)
@@ -332,7 +235,7 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
     """
     # Check that blocks is really a list
     if not isinstance(blocks, list):
-        raise TypeError("Blocks must be a list, not a \"{0}\"".format(type(blocks)))
+        raise TypeError('Blocks must be a list, not a "{0}"'.format(type(blocks)))
 
     # If we have hit the max recursion depth throw an error
     if level >= max_recurse:
@@ -351,17 +254,19 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
         for key in user_block:
             # If the override isn't a valid part of the block, throw an error
             if key not in block:
-                raise ValueError("Invalid key in user provided block: \"{:s}\"".format(key))
+                raise ValueError('Invalid key in user provided block: "{:s}"'.format(key))
 
             # Check dtype when required
             if key == "name":
                 if not isinstance(user_block[key], str):
-                    raise TypeError("Block attribute \"name\" must be a string not "
-                                    "\"{0}\"".format(type(user_block[key])))
+                    raise TypeError(
+                        'Block attribute "name" must be a string not ' '"{0}"'.format(type(user_block[key]))
+                    )
             if key == "children":
                 if not isinstance(user_block[key], list):
-                    raise TypeError("Block attribute \"children\" must be a list not "
-                                    "\"{0}\"".format(type(user_block[key])))
+                    raise TypeError(
+                        'Block attribute "children" must be a list not ' '"{0}"'.format(type(user_block[key]))
+                    )
 
             # Override the header
             block[key] = user_block[key]
@@ -378,19 +283,23 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
 
         # If we are a numpy array then write it
         if isinstance(block["value"], np.ndarray):
-            if block["value"].dtype == np.dtype('int64'):
+            if block["value"].dtype == np.dtype("int64"):
                 if (np.abs(block["value"]) > 0x7FFFFFFF).any():
                     idx = np.argmax(np.abs(block["value"]))
-                    raise ValueError(f'An array element exceeds the range of int32 (max compatible GDF size).  The '
-                                     f'element at index {idx} had value {block["value"]}, but int32s must have a max '
-                                     f'absolute value of 2,147,483,647.')
+                    raise ValueError(
+                        f'An array element exceeds the range of int32 (max compatible GDF size).  The '
+                        f'element at index {idx} had value {block["value"]}, but int32s must have a max '
+                        f'absolute value of 2,147,483,647.'
+                    )
                 bval = block["value"].astype(np.int32)
-            elif block["value"].dtype == np.dtype('uint64'):
+            elif block["value"].dtype == np.dtype("uint64"):
                 if (block["value"] > 0xFFFFFFFF).any():
                     idx = np.argmax(np.abs(block["value"]))
-                    raise ValueError(f'An array element exceeds the range of uint32 (max compatible GDF size).  The '
-                                     f'element at index {idx} had value {block["value"]}, but int32s must have a max '
-                                     f'absolute value of 4,294,967,295.')
+                    raise ValueError(
+                        f'An array element exceeds the range of uint32 (max compatible GDF size).  The '
+                        f'element at index {idx} had value {block["value"]}, but int32s must have a max '
+                        f'absolute value of 4,294,967,295.'
+                    )
                 bval = block["value"].astype(np.uint32)
             else:
                 bval = block["value"]
@@ -401,7 +310,7 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
             # Determine the data type and add it to the header
             dname = bval.dtype.name
             if dname not in NUMPY_TO_GDF:
-                raise TypeError("Cannot write numpy data type \"{0}\" to GDF file".format(dname))
+                raise TypeError('Cannot write numpy data type "{0}" to GDF file'.format(dname))
             block_type_flag += NUMPY_TO_GDF[dname]
 
             # Write the header and then write the numpy array to the file
@@ -418,20 +327,28 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
             if isinstance(block["value"], str):
                 block_type_flag += GDF_ASCII
                 block_size = len(block["value"])
-                f.write(bname + struct.pack("ii{:d}s".format(block_size), block_type_flag, block_size,
-                                            bytes(block["value"], "ascii")))
+                f.write(
+                    bname
+                    + struct.pack(
+                        "ii{:d}s".format(block_size), block_type_flag, block_size, bytes(block["value"], "ascii")
+                    )
+                )
             elif isinstance(block["value"], int):
                 if block["value"] > 0:
                     if abs(block["value"]) > 0xFFFFFFFF:
-                        raise ValueError(f"Value exceeds range of 32-bit unsigned int (largest supported size in GDF). "
-                                         f"Value cannot exceed 4,294,967,295.  Received {block['value']}")
+                        raise ValueError(
+                            f"Value exceeds range of 32-bit unsigned int (largest supported size in GDF). "
+                            f"Value cannot exceed 4,294,967,295.  Received {block['value']}"
+                        )
                     block_type_flag += GDF_UINT32
                     block_size = 4
                     f.write(bname + struct.pack("iiI", block_type_flag, block_size, block["value"]))
                 else:
                     if abs(block["value"]) > 0x7FFFFFFF:
-                        raise ValueError(f"Value exceeds range of 32-bit signed int (largest supported size in GDF). "
-                                         f"Absolute value cannot exceed 2,147,483,647.  Received {block['value']}")
+                        raise ValueError(
+                            f"Value exceeds range of 32-bit signed int (largest supported size in GDF). "
+                            f"Absolute value cannot exceed 2,147,483,647.  Received {block['value']}"
+                        )
                     block_type_flag += GDF_INT32
                     block_size = 4
                     f.write(bname + struct.pack("iii", block_type_flag, block_size, block["value"]))
@@ -444,24 +361,29 @@ def save_blocks(f, blocks, level=0, max_recurse=16):
                 block_size = 0
                 f.write(bname + struct.pack("ii", block_type_flag, block_size))
             else:
-                raise TypeError("Cannot write data type \"{0}\" to GDF file".format(type(block["value"])))
+                raise TypeError('Cannot write data type "{0}" to GDF file'.format(type(block["value"])))
 
         # Recurse on the children of this block
         if len(block["children"]) != 0:
-            save_blocks(
-                f,
-                block["children"],
-                level=level + 1,
-                max_recurse=max_recurse
-            )
+            save_blocks(f, block["children"], level=level + 1, max_recurse=max_recurse)
 
     # If we are not the root group, then write a group end block
     if level > 0:
         f.write(struct.pack("{0}sii".format(GDF_NAME_LEN), b"", GDF_NULL + GDF_GROUP_END, 0))
 
 
-def save(f, blocks=None, creation_time=None, creator="easygdf", destination="", gdf_version=(1, 1),
-         creator_version=(2, 0), destination_version=(0, 0), dummy=(0, 0), max_recurse=16):
+def save(
+    f,
+    blocks=None,
+    creation_time=None,
+    creator="easygdf",
+    destination="",
+    gdf_version=(1, 1),
+    creator_version=(2, 0),
+    destination_version=(0, 0),
+    dummy=(0, 0),
+    max_recurse=16,
+):
     """
     Saves user provided data into a GDF file.  Blocks are python dicts with the keys: name, value, children.  Name must
     be a string that may be encoded as ASCII.  Values may be an int, a float, a string, None, a bytes object, or a numpy
@@ -498,12 +420,13 @@ def save(f, blocks=None, creation_time=None, creator="easygdf", destination="", 
                 ff,
                 blocks=blocks,
                 creation_time=creation_time,
-                creator=creator, destination=destination,
+                creator=creator,
+                destination=destination,
                 gdf_version=gdf_version,
                 creator_version=creator_version,
                 destination_version=destination_version,
                 dummy=dummy,
-                max_recurse=max_recurse
+                max_recurse=max_recurse,
             )
 
     # Make sure we have an open file
@@ -519,21 +442,23 @@ def save(f, blocks=None, creation_time=None, creator="easygdf", destination="", 
         creation_time = int(datetime.datetime.timestamp(creation_time))
 
     # Write the header
-    f.write(struct.pack(
-        "2i{0}s{0}s8B".format(GDF_NAME_LEN),
-        GDF_MAGIC,
-        creation_time,
-        bytes(creator, "ascii"),
-        bytes(destination, "ascii"),
-        gdf_version[0],
-        gdf_version[1],
-        creator_version[0],
-        creator_version[1],
-        destination_version[0],
-        destination_version[1],
-        dummy[0],
-        dummy[1],
-    ))
+    f.write(
+        struct.pack(
+            "2i{0}s{0}s8B".format(GDF_NAME_LEN),
+            GDF_MAGIC,
+            creation_time,
+            bytes(creator, "ascii"),
+            bytes(destination, "ascii"),
+            gdf_version[0],
+            gdf_version[1],
+            creator_version[0],
+            creator_version[1],
+            destination_version[0],
+            destination_version[1],
+            dummy[0],
+            dummy[1],
+        )
+    )
 
     # Save the root group and then recurse (inside function)
     save_blocks(f, blocks, max_recurse=max_recurse)

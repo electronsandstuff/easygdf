@@ -1,5 +1,3 @@
-#  This file is part of easygdf and is released under the BSD 3-clause license
-
 import datetime
 import os
 import tempfile
@@ -20,45 +18,45 @@ class TestEasyGDFInitialDistribution(unittest.TestCase):
         :return:
         """
         self.ref = {
-            'x': np.array([3.389e-05, 2.314e-05, 3.261e-05, 3.295e-05, 3.559e-05]),
-            'y': np.array([3.096e-08, 3.241e-08, 3.506e-08, 3.717e-08, 3.990e-08]),
-            'z': np.array([0., 0., 0., 0., 0.]),
-            'GBx': np.array([0., 0., 0., 0., 0.]),
-            'GBy': np.array([0., 0., 0., 0., 0.]),
-            'GBz': np.array([0., 0., 0., 0., 0.]),
-            't': np.array([1.865e-11, -1.712e-11, -1.367e-11, -9.963e-12, -1.238e-11]),
-            'q': np.array([-1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19]),
-            'nmacro': np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
-            'creation_time': datetime.datetime(2019, 8, 7, 20, 47, 1, tzinfo=datetime.timezone.utc),
-            'creator': 'ASCI2GDF',
-            'destination': '',
-            'gdf_version': (1, 1),
-            'creator_version': (1, 0),
-            'destination_version': (0, 0),
-            'dummy': (0, 0)
+            "x": np.array([3.389e-05, 2.314e-05, 3.261e-05, 3.295e-05, 3.559e-05]),
+            "y": np.array([3.096e-08, 3.241e-08, 3.506e-08, 3.717e-08, 3.990e-08]),
+            "z": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "GBx": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "GBy": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "GBz": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "t": np.array([1.865e-11, -1.712e-11, -1.367e-11, -9.963e-12, -1.238e-11]),
+            "q": np.array([-1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19]),
+            "nmacro": np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
+            "creation_time": datetime.datetime(2019, 8, 7, 20, 47, 1, tzinfo=datetime.timezone.utc),
+            "creator": "ASCI2GDF",
+            "destination": "",
+            "gdf_version": (1, 1),
+            "creator_version": (1, 0),
+            "destination_version": (0, 0),
+            "dummy": (0, 0),
         }
 
         self.ref2 = {
-            'x': np.array([3.389e-05, 2.314e-05, 3.261e-05, 3.295e-05, 3.559e-05]),
-            'y': np.array([3.096e-08, 3.241e-08, 3.506e-08, 3.717e-08, 3.990e-08]),
-            'z': np.array([0., 0., 0., 0., 0.]),
-            'Bx': np.array([0., 0., 0., 0., 0.]),
-            'By': np.array([0., 0., 0., 0., 0.]),
-            'Bz': np.array([0., 0., 0., 0., 0.]),
-            't': np.array([1.865e-11, -1.712e-11, -1.367e-11, -9.963e-12, -1.238e-11]),
-            'q': np.array([-1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19]),
-            'nmacro': np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
+            "x": np.array([3.389e-05, 2.314e-05, 3.261e-05, 3.295e-05, 3.559e-05]),
+            "y": np.array([3.096e-08, 3.241e-08, 3.506e-08, 3.717e-08, 3.990e-08]),
+            "z": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "Bx": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "By": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "Bz": np.array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            "t": np.array([1.865e-11, -1.712e-11, -1.367e-11, -9.963e-12, -1.238e-11]),
+            "q": np.array([-1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19, -1.602e-19]),
+            "nmacro": np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
             "m": np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
-            "G": np.array([1., 1., 1., 1., 1.]),
-            "ID": np.array([1., 2., 3., 4., 5.]),
-            'rmacro': np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
-            'creation_time': datetime.datetime(2019, 8, 7, 20, 47, 1, tzinfo=datetime.timezone.utc),
-            'creator': 'ASCI2GDF',
-            'destination': '',
-            'gdf_version': (1, 1),
-            'creator_version': (1, 0),
-            'destination_version': (0, 0),
-            'dummy': (0, 0)
+            "G": np.array([1.0, 1.0, 1.0, 1.0, 1.0]),
+            "ID": np.array([1.0, 2.0, 3.0, 4.0, 5.0]),
+            "rmacro": np.array([8.752, 8.752, 8.752, 8.752, 8.752]),
+            "creation_time": datetime.datetime(2019, 8, 7, 20, 47, 1, tzinfo=datetime.timezone.utc),
+            "creator": "ASCI2GDF",
+            "destination": "",
+            "gdf_version": (1, 1),
+            "creator_version": (1, 0),
+            "destination_version": (0, 0),
+            "dummy": (0, 0),
         }
 
     def test_load(self):
@@ -133,7 +131,7 @@ class TestEasyGDFInitialDistribution(unittest.TestCase):
             all_data = easygdf.load_initial_distribution(f)
 
         # Check array lengths
-        arr_names = ['x', 'y', 'z', 'GBx', 'GBy', 'GBz']
+        arr_names = ["x", "y", "z", "GBx", "GBy", "GBz"]
         for a in arr_names:
             self.assertEqual(all_data[a].size, 11)
 
@@ -148,7 +146,7 @@ class TestEasyGDFInitialDistribution(unittest.TestCase):
             all_data = easygdf.load_initial_distribution(f)
 
         # Check array lengths
-        arr_names = ['x', 'y', 'z', 'Bx', 'By', 'Bz']
+        arr_names = ["x", "y", "z", "Bx", "By", "Bz"]
         for a in arr_names:
             self.assertEqual(all_data[a].size, 11)
 

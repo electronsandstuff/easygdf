@@ -22,3 +22,8 @@ easygdf = ["data/*"]
 
 [project.urls]
 Homepage = "https://github.com/electronsandstuff/easygdf"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py312"

@@ -1,4 +1,8 @@
-import datetime, os, struct, tempfile, unittest
+import datetime
+import os
+import struct
+import tempfile
+import unittest
 import numpy as np
 import easygdf
 
@@ -8,7 +12,6 @@ from .utils import load_test_resource
 class TestEasyGDFHelpers(unittest.TestCase):
     def test_is_gdf(self):
         # Attempt to open the file and use the method under test
-        
         with load_test_resource("data/test.gdf") as f:
             is_gdf = easygdf.is_gdf(f)
         self.assertTrue(is_gdf, True)
@@ -21,9 +24,9 @@ class TestEasyGDFHelpers(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create an empty file in the temp directory
             empty_file_path = os.path.join(temp_dir, "empty.gdf")
-            with open(empty_file_path, 'wb') as f:
+            with open(empty_file_path, "wb") as f:
                 pass
-            
+
             # Test the empty file
             self.assertFalse(easygdf.is_gdf(empty_file_path))
 
@@ -72,13 +75,13 @@ class TestEasyGDFLoad(unittest.TestCase):
 
         # Write out the expected header
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
-            'creator': 'ASCI2GDF',
-            'destination': '',
-            'gdf_version': (1, 1),
-            'creator_version': (1, 0),
-            'destination_version': (0, 0),
-            'dummy': (0, 0)
+            "creation_time": datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
+            "creator": "ASCI2GDF",
+            "destination": "",
+            "gdf_version": (1, 1),
+            "creator_version": (1, 0),
+            "destination_version": (0, 0),
+            "dummy": (0, 0),
         }
 
         # Compare with what we got
@@ -96,13 +99,13 @@ class TestEasyGDFLoad(unittest.TestCase):
 
         # Write out the expected header
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
-            'creator': 'ASCI2GDF',
-            'destination': '',
-            'gdf_version': (1, 1),
-            'creator_version': (1, 0),
-            'destination_version': (0, 0),
-            'dummy': (0, 0)
+            "creation_time": datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
+            "creator": "ASCI2GDF",
+            "destination": "",
+            "gdf_version": (1, 1),
+            "creator_version": (1, 0),
+            "destination_version": (0, 0),
+            "dummy": (0, 0),
         }
 
         # Compare with what we got
@@ -301,13 +304,13 @@ class TestEasyGDFSave(unittest.TestCase):
         """
         # Write the header expected for the reference file
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
-            'creator': 'ASCI2GDF',
-            'destination': '',
-            'gdf_version': (1, 1),
-            'creator_version': (1, 0),
-            'destination_version': (0, 0),
-            'dummy': (0, 0)
+            "creation_time": datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
+            "creator": "ASCI2GDF",
+            "destination": "",
+            "gdf_version": (1, 1),
+            "creator_version": (1, 0),
+            "destination_version": (0, 0),
+            "dummy": (0, 0),
         }
 
         # Write out the block data for the reference file
@@ -356,13 +359,13 @@ class TestEasyGDFSave(unittest.TestCase):
         """
         # Write the header expected for the reference file
         fh = {
-            'creation_time': datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
-            'creator': 'ASCI2GDF',
-            'destination': '',
-            'gdf_version': (1, 1),
-            'creator_version': (1, 0),
-            'destination_version': (0, 0),
-            'dummy': (0, 0)
+            "creation_time": datetime.datetime(2020, 11, 25, 17, 34, 24, tzinfo=datetime.timezone.utc),
+            "creator": "ASCI2GDF",
+            "destination": "",
+            "gdf_version": (1, 1),
+            "creator_version": (1, 0),
+            "destination_version": (0, 0),
+            "dummy": (0, 0),
         }
 
         # Write out the block data for the reference file
@@ -411,31 +414,40 @@ class TestEasyGDFSave(unittest.TestCase):
         ref_blocks = []
 
         # Dump all of the possible numpy array types into blocks
-        dtypes = ["int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64",
-                  "float32", "float64"]
+        dtypes = ["int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64", "float32", "float64"]
         for dtype in dtypes:
-            ref_blocks.append({
-                "name": "array_" + dtype,
-                "value": np.linspace(0, 5, 6, dtype=dtype),
-            })
+            ref_blocks.append(
+                {
+                    "name": "array_" + dtype,
+                    "value": np.linspace(0, 5, 6, dtype=dtype),
+                }
+            )
 
         # Add each single type
-        ref_blocks.append({
-            "name": "single_str",
-            "value": "deadbeef",
-        })
-        ref_blocks.append({
-            "name": "single_int",
-            "value": 1729,
-        })
-        ref_blocks.append({
-            "name": "single_float",
-            "value": 3.14,
-        })
-        ref_blocks.append({
-            "name": "single_none",
-            "value": None,
-        })
+        ref_blocks.append(
+            {
+                "name": "single_str",
+                "value": "deadbeef",
+            }
+        )
+        ref_blocks.append(
+            {
+                "name": "single_int",
+                "value": 1729,
+            }
+        )
+        ref_blocks.append(
+            {
+                "name": "single_float",
+                "value": 3.14,
+            }
+        )
+        ref_blocks.append(
+            {
+                "name": "single_none",
+                "value": None,
+            }
+        )
 
         # Save everything as a GDF file
         testfile = os.path.join(tempfile.gettempdir(), "save_all_dtypes.gdf")
@@ -514,8 +526,9 @@ class TestEasyGDFSave(unittest.TestCase):
         :return:
         """
         # Create a header to save
-        my_time = datetime.datetime.fromtimestamp(int(datetime.datetime.timestamp(datetime.datetime.now())),
-                                                  tz=datetime.timezone.utc)
+        my_time = datetime.datetime.fromtimestamp(
+            int(datetime.datetime.timestamp(datetime.datetime.now())), tz=datetime.timezone.utc
+        )
         fh = {
             "creation_time": my_time,
             "creator": "easygdf",
@@ -544,21 +557,23 @@ class TestEasyGDFSave(unittest.TestCase):
         """
         # The reference blocks
         ref = [
-            {"name": "A",
-             "value": 0,
-             "children": [
-                 {"name": "B",
-                  "value": "string",
-                  "children": [
-                      {"name": "C",
-                       "value": 1.2,
-                       "children": [
-                           {"name": "D",
-                            "value": "another string",
-                            "children": []}
-                       ]}
-                  ]}
-             ]}
+            {
+                "name": "A",
+                "value": 0,
+                "children": [
+                    {
+                        "name": "B",
+                        "value": "string",
+                        "children": [
+                            {
+                                "name": "C",
+                                "value": 1.2,
+                                "children": [{"name": "D", "value": "another string", "children": []}],
+                            }
+                        ],
+                    }
+                ],
+            }
         ]
 
         # Write it and read it back
@@ -608,16 +623,31 @@ class TestEasyGDFSave(unittest.TestCase):
         # Test overflowing the negative value
         with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_1.gdf"), "wb") as f:
             with self.assertRaises(ValueError):
-                easygdf.save(f, [{'name': 'ID', 'value': -0x80000000, 'children': []}, ])
+                easygdf.save(
+                    f,
+                    [
+                        {"name": "ID", "value": -0x80000000, "children": []},
+                    ],
+                )
 
         # Confirm something bigger than the max int32 but smaller than the max uint32 doesn't overflow
         with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_2.gdf"), "wb") as f:
-            easygdf.save(f, [{'name': 'ID', 'value': 0x80000000, 'children': []}, ])
+            easygdf.save(
+                f,
+                [
+                    {"name": "ID", "value": 0x80000000, "children": []},
+                ],
+            )
 
         # Test overflowing the positive value
         with open(os.path.join(tempfile.gettempdir(), "save_int_single_overflow_3.gdf"), "wb") as f:
             with self.assertRaises(ValueError):
-                easygdf.save(f, [{'name': 'ID', 'value': 0x100000000, 'children': []}, ])
+                easygdf.save(
+                    f,
+                    [
+                        {"name": "ID", "value": 0x100000000, "children": []},
+                    ],
+                )
 
     def test_int_array_overflow(self):
         """
@@ -628,14 +658,22 @@ class TestEasyGDFSave(unittest.TestCase):
         # Test overflowing int32
         with open(os.path.join(tempfile.gettempdir(), "save_int_array_overflow_1.gdf"), "wb") as f:
             with self.assertRaises(ValueError):
-                easygdf.save(f, [{'name': 'ID', 'value': np.array([0x80000000, 0, 0, 0], dtype=np.int64),
-                                  'children': []}, ])
+                easygdf.save(
+                    f,
+                    [
+                        {"name": "ID", "value": np.array([0x80000000, 0, 0, 0], dtype=np.int64), "children": []},
+                    ],
+                )
 
         # Test overflowing int64
         with open(os.path.join(tempfile.gettempdir(), "save_int_array_overflow_2.gdf"), "wb") as f:
             with self.assertRaises(ValueError):
-                easygdf.save(f, [{'name': 'ID', 'value': np.array([0x100000000, 0, 0, 0], dtype=np.uint64),
-                                  'children': []}, ])
+                easygdf.save(
+                    f,
+                    [
+                        {"name": "ID", "value": np.array([0x100000000, 0, 0, 0], dtype=np.uint64), "children": []},
+                    ],
+                )
 
 
 class TestEasyGDFLoadSave(unittest.TestCase):
@@ -666,11 +704,21 @@ class TestEasyGDFLoadSave(unittest.TestCase):
         # Test conversion from int64 -> int32
         test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_casting_1.gdf")
         with open(test_file, "wb") as f:
-            easygdf.save(f, [{'name': 'ID', 'value': np.zeros(32, dtype=np.int64), 'children': []}, ])
-        self.assertEqual(easygdf.load_initial_distribution(test_file)['ID'].dtype, np.dtype('int32'))
+            easygdf.save(
+                f,
+                [
+                    {"name": "ID", "value": np.zeros(32, dtype=np.int64), "children": []},
+                ],
+            )
+        self.assertEqual(easygdf.load_initial_distribution(test_file)["ID"].dtype, np.dtype("int32"))
 
         # Test conversion from uint64 -> uint32
         test_file = os.path.join(tempfile.gettempdir(), "save_initial_distribution_test_integer_casting_2.gdf")
         with open(test_file, "wb") as f:
-            easygdf.save(f, [{'name': 'ID', 'value': np.zeros(32, dtype=np.uint64), 'children': []}, ])
-        self.assertEqual(easygdf.load_initial_distribution(test_file)['ID'].dtype, np.dtype('uint32'))
+            easygdf.save(
+                f,
+                [
+                    {"name": "ID", "value": np.zeros(32, dtype=np.uint64), "children": []},
+                ],
+            )
+        self.assertEqual(easygdf.load_initial_distribution(test_file)["ID"].dtype, np.dtype("uint32"))

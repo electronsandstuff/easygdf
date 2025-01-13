@@ -1,5 +1,3 @@
-#  This file is part of easygdf and is released under the BSD 3-clause license
-
 import numpy as np
 
 from . import easygdf
@@ -17,7 +15,7 @@ def normalize_screen(screen):
     out = {}
 
     # Write out the list of keys to create array objects from (Warning: G and rxy need to go at end)
-    arr_keys = ['ID', 'x', 'y', 'z', 'Bx', 'By', 'Bz', 't', 'm', 'q', 'nmacro', 'rmacro', 'rxy', 'G']
+    arr_keys = ["ID", "x", "y", "z", "Bx", "By", "Bz", "t", "m", "q", "nmacro", "rmacro", "rxy", "G"]
 
     # Handle the position element
     if "position" not in screen:
@@ -63,10 +61,39 @@ def normalize_tout(tout):
     out = {}
 
     # Write out the list of array keys (Warning: G and rxy need to be at end of array)
-    par_keys = ['x', 'y', 'z', 'Bx', 'By', 'Bz', 'm', 'q', 'nmacro', 'rmacro', 'ID', 'fEx', 'fEy', 'fEz',
-                'fBx', 'fBy', 'fBz', 'G', 'rxy']
-    scat_keys = ['scat_x', 'scat_y', 'scat_z', 'scat_Qin', 'scat_Qout', 'scat_Qnet', 'scat_Ein', 'scat_Eout',
-                 'scat_Enet', 'scat_inp']
+    par_keys = [
+        "x",
+        "y",
+        "z",
+        "Bx",
+        "By",
+        "Bz",
+        "m",
+        "q",
+        "nmacro",
+        "rmacro",
+        "ID",
+        "fEx",
+        "fEy",
+        "fEz",
+        "fBx",
+        "fBy",
+        "fBz",
+        "G",
+        "rxy",
+    ]
+    scat_keys = [
+        "scat_x",
+        "scat_y",
+        "scat_z",
+        "scat_Qin",
+        "scat_Qout",
+        "scat_Qnet",
+        "scat_Ein",
+        "scat_Eout",
+        "scat_Enet",
+        "scat_inp",
+    ]
 
     # Handle the time element
     if "time" not in tout:
@@ -113,12 +140,32 @@ def normalize_tout(tout):
     return out
 
 
-def save_screens_touts(f, screens=None, touts=None, logo="B&M-General Particle Tracer", scat_x=np.array([]),
-                       scat_y=np.array([]), scat_z=np.array([]), scat_Qin=np.array([]),
-                       scat_Qout=np.array([]), scat_Qnet=np.array([]), scat_Ein=np.array([]),
-                       scat_Eout=np.array([]), scat_Enet=np.array([]), scat_inp=np.array([]), numderivs=0,
-                       cputime=0.0, creation_time=None, creator="easygdf", destination="", gdf_version=(1, 1),
-                       creator_version=(2, 0), destination_version=(0, 0), dummy=(0, 0), max_recurse=16):
+def save_screens_touts(
+    f,
+    screens=None,
+    touts=None,
+    logo="B&M-General Particle Tracer",
+    scat_x=np.array([]),
+    scat_y=np.array([]),
+    scat_z=np.array([]),
+    scat_Qin=np.array([]),
+    scat_Qout=np.array([]),
+    scat_Qnet=np.array([]),
+    scat_Ein=np.array([]),
+    scat_Eout=np.array([]),
+    scat_Enet=np.array([]),
+    scat_inp=np.array([]),
+    numderivs=0,
+    cputime=0.0,
+    creation_time=None,
+    creator="easygdf",
+    destination="",
+    gdf_version=(1, 1),
+    creator_version=(2, 0),
+    destination_version=(0, 0),
+    dummy=(0, 0),
+    max_recurse=16,
+):
     """
     Saves user data into a file with the format of a GPT output.  Signature is fully compatible with the output of the
     corresponding load function.  Screens and touts are passed as a list of dicts with the following numpy arrays.
@@ -174,9 +221,16 @@ def save_screens_touts(f, screens=None, touts=None, logo="B&M-General Particle T
 
     # Deal with the array arguments which must have the same dimensions
     arr_elems = {
-        "scat_x": scat_x, "scat_y": scat_y, "scat_z": scat_z, "scat_Qin": scat_Qin, "scat_Qout": scat_Qout,
-        "scat_Qnet": scat_Qnet, "scat_Ein": scat_Ein, "scat_Eout": scat_Eout, "scat_Enet": scat_Enet,
-        "scat_inp": scat_inp
+        "scat_x": scat_x,
+        "scat_y": scat_y,
+        "scat_z": scat_z,
+        "scat_Qin": scat_Qin,
+        "scat_Qout": scat_Qout,
+        "scat_Qnet": scat_Qnet,
+        "scat_Ein": scat_Ein,
+        "scat_Eout": scat_Eout,
+        "scat_Enet": scat_Enet,
+        "scat_inp": scat_inp,
     }
     target_len = max([arr_elems[x].size for x in arr_elems])
     for key in arr_elems:
@@ -191,7 +245,7 @@ def save_screens_touts(f, screens=None, touts=None, logo="B&M-General Particle T
     blocks = [
         {"name": "@logo", "value": logo},
         {"name": "numderivs", "value": numderivs},
-        {"name": "cputime", "value": cputime}
+        {"name": "cputime", "value": cputime},
     ]
 
     # Add all root elements to the blocks
@@ -205,9 +259,9 @@ def save_screens_touts(f, screens=None, touts=None, logo="B&M-General Particle T
 
         # Create the block
         pos = nscreen.pop("position")
-        blocks.append({"name": "position",
-                       "value": pos,
-                       "children": [{"name": x, "value": nscreen[x]} for x in nscreen]})
+        blocks.append(
+            {"name": "position", "value": pos, "children": [{"name": x, "value": nscreen[x]} for x in nscreen]}
+        )
 
     # Go through each tout and add them
     for tout in touts:
@@ -216,14 +270,21 @@ def save_screens_touts(f, screens=None, touts=None, logo="B&M-General Particle T
 
         # Create the block
         time = ntout.pop("time")
-        blocks.append({"name": "time",
-                       "value": time,
-                       "children": [{"name": x, "value": ntout[x]} for x in ntout]})
+        blocks.append({"name": "time", "value": time, "children": [{"name": x, "value": ntout[x]} for x in ntout]})
 
     # Write the blocks to disk
-    easygdf.save(f, blocks, creation_time=creation_time, creator=creator, destination=destination,
-                 gdf_version=gdf_version, creator_version=creator_version, destination_version=destination_version,
-                 dummy=dummy, max_recurse=max_recurse)
+    easygdf.save(
+        f,
+        blocks,
+        creation_time=creation_time,
+        creator=creator,
+        destination=destination,
+        gdf_version=gdf_version,
+        creator_version=creator_version,
+        destination_version=destination_version,
+        dummy=dummy,
+        max_recurse=max_recurse,
+    )
 
 
 def load_screens_touts(f, max_recurse=16, max_block=1e6):
