@@ -360,7 +360,6 @@ def write_file(path, b):
 data_files_path = "easygdf/tests/data"
 if __name__ == "__main__":
     write_file(os.path.join(data_files_path, "normalize_screen_floats.gdf"), get_normalize_screen_floats())
-    """
     write_file(os.path.join(data_files_path, "version_mismatch.gdf"), get_file_version_mismatch())
     write_file(os.path.join(data_files_path, "wrong_magic_number.gdf"), get_file_wrong_magic_number())
     write_file(os.path.join(data_files_path, "too_much_recursion.gdf"), get_file_too_much_recursion())
@@ -376,4 +375,3 @@ if __name__ == "__main__":
     write_file(os.path.join(data_files_path, "invalid_size_array.gdf"), get_file_invalid_array_size())
     write_file(os.path.join(data_files_path, "nested_groups.gdf"), get_file_nested_group())
     write_file(os.path.join(data_files_path, "null_array.gdf"), get_file_null_array())
-    """
