@@ -549,12 +549,15 @@ def save(
     :param max_recurse: Maximum recursion depth while saving blocks in GDF file
     :return: None
     """
+    start_time = time.perf_counter()
+
     # Fix for mutable default argument
     if blocks is None:
         blocks = []
 
     # If we were handed a string, then run this function on it with the file opened
     if isinstance(f, str):
+        logger.debug(f"Opening file for writing: {f}")
         with open(f, "wb") as ff:
             return save(
                 ff,
@@ -571,7 +574,9 @@ def save(
 
     # Make sure we have an open file
     if not isinstance(f, io.BufferedWriter):
-        raise GDFIOError(f"f must be file-like or a string not '{type(f)}'")
+        err_msg = f"f must be file-like or a string not '{type(f)}'"
+        logger.error(err_msg)
+        raise GDFIOError(err_msg)
 
     # If not given user defined creation time, then take current date
     if creation_time is None:
@@ -582,23 +587,30 @@ def save(
         creation_time = int(datetime.datetime.timestamp(creation_time))
 
     # Write the header
-    f.write(
-        struct.pack(
-            "2i{0}s{0}s8B".format(GDF_NAME_LEN),
-            GDF_MAGIC,
-            creation_time,
-            bytes(creator, "ascii"),
-            bytes(destination, "ascii"),
-            gdf_version[0],
-            gdf_version[1],
-            creator_version[0],
-            creator_version[1],
-            destination_version[0],
-            destination_version[1],
-            dummy[0],
-            dummy[1],
-        )
+    header = struct.pack(
+        "2i{0}s{0}s8B".format(GDF_NAME_LEN),
+        GDF_MAGIC,
+        creation_time,
+        bytes(creator, "ascii"),
+        bytes(destination, "ascii"),
+        gdf_version[0],
+        gdf_version[1],
+        creator_version[0],
+        creator_version[1],
+        destination_version[0],
+        destination_version[1],
+        dummy[0],
+        dummy[1],
+    )
+    f.write(header)
+    logger.debug(
+        f"Wrote GDF header ({len(header)} bytes): version={gdf_version[0]}.{gdf_version[1]} creator='{creator}'"
     )
 
     # Save the root group and then recurse (inside function)
-    save_blocks(f, blocks, max_recurse=max_recurse)
+    total_bytes, total_blocks = save_blocks(f, blocks, max_recurse=max_recurse)
+    total_time = time.perf_counter() - start_time
+
+    logger.info(
+        f"Saved GDF file in {total_time:.3f} seconds (root_blocks={len(blocks)}, total_blocks={total_blocks}, bytes_written={total_bytes})"
+    )
