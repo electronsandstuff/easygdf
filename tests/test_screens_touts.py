@@ -4,7 +4,9 @@ import tempfile
 import unittest
 import easygdf
 
-from .utils import load_test_resource
+
+def load_test_resource(path):
+    return open(os.path.join(os.path.dirname(os.path.realpath(__file__)), path), "rb")
 
 
 class TestEasyGDFScreensTouts(unittest.TestCase):
